@@ -6,16 +6,16 @@
   <link href='http://fonts.googleapis.com/css?family=Cutive' rel='stylesheet' type='text/css'>
   <style>
     section#main {
-        font-size: 72px;
+        font-size: 64px;
         text-align: center;
         font-family: 'Loved by the King'; /* use browser's default font as fallback */
     }
     section#main em { font-style: normal; text-transform: uppercase; }
     section#main li { display: block; list-style: none; }
     section#more {
-        font-size: 22px;
+        font-size: 18px;
         font-family: Cutive, serif;
-        margin: 0 12% 5em;
+        margin: 0 12% 3em;
     }
     section#more strong {
         font-weight: normal;
@@ -23,6 +23,12 @@
         text-transform: uppercase;
     }
     p.hrule { text-align: center; }
+    div.warning {
+        text-align: center;
+        padding: 0.5em;
+        background-color: #ffff66;
+        margin-bottom: 2em;
+    }
   </style>
 </head>
 <body>
@@ -35,6 +41,11 @@
     </ul>
   </section>
   <section id="more">
+    <div class="warning">
+      <p>Hack day is free to attend, but <strong>space is limited</strong>.&nbsp;
+        <a href="mailto:jason.orendorff@gmail.com?subject=Nashville+hack+day">Send email</a>
+        or tweet @jorendorff to reserve your spot.</p>
+    </div>
     <p>What: A one-day community event by Nashville developers for Nashville developers.</p>
     <p>When: 9 A.M. Saturday, August 11</p>
     <p>Where: centresource (<a href="https://maps.google.com/?q=centresource+1313+4th+Ave+N+Nashville,+TN+37208">map</a>)</p>
@@ -47,6 +58,7 @@
       <li>the nuts and bolts of consulting</li>
       <li>&hellip;and more (and the talks aren&rsquo;t even the fun part)</li>
     </ul>
+    <p>We still have a few slots, so if you have a cool idea for a 5-10 minute talk, let me know.</p>
     <script>
       // shuffle the list items, just for fun
       (function () {
@@ -58,10 +70,6 @@
           }
       })();
     </script>
-    <p>Hack day is free to attend, but <strong>space is limited</strong>.&nbsp;
-      <a href="mailto:jason.orendorff@gmail.com?subject=Nashville+hack+day">Send email</a>
-      or tweet @jorendorff to reserve your spot.&nbsp;
-      Got a cool idea for a 5-10 minute talk?&nbsp; Let me know.</p>
     <p class="hrule">~</p>
     <p>Generously sponsored, hosted, and caffeinated by the amazing people at
       <a href="http://www.centresource.com/">centresource</a>.</p>
