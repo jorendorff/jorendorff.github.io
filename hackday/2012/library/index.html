@@ -1,0 +1,499 @@
+<html>
+<head>
+  <title>Sorting and searching at the library</title>
+  <link href="http://fonts.googleapis.com/css?family=Sorts+Mill+Goudy:400,400italic" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+        font-family: Sorts Mill Goudy, serif;
+        color: #666; background-color: #fdfbfb;
+        margin: 0;
+    }
+    body, th, td { font-size: 15pt; }
+
+    div.body, div.head {
+        margin-left: auto; margin-right: auto; max-width: 46em;
+    }
+    div.inbody, div.inhead {
+        margin-left: 1em;
+        margin-right: 1em;
+    }
+    div.outhead {
+        background-image: url(leaves.jpg);
+        background-size: 100%;
+    }
+    hgroup {
+        margin-left: -16em;
+        padding-left: 16em;
+        padding-top: 8em;
+    }
+    hgroup h1, hgroup h2 {
+        color: #fdfbfb;
+        opacity: 1.0;
+        text-shadow: rgba(0, 0, 0, 0.3) 3px 2px;
+    }
+    hgroup h1 { font-size: 210%; ;}
+    hgroup h2 { font-size: 170%; }
+
+
+    h1, h2, h3, h4, h5, h6 { color: black; opacity: 0.75; font-style: italic; font-weight: normal; }
+    div.by { font-style: italic; text-align: right; }
+    p { line-height: 1.4em; }
+    pre { margin-left: 2.5em; }
+    kbd { font-weight: bold; }
+    span.error { color: #c00; }
+    a:link { color: #446077; }
+    a:visited { color: #3c5066; }
+    a:link.sublim { text-decoration: none; }
+    a:hover.sublim { text-decoration: underline; }
+
+    section { margin-top: 2.5em; }
+    hr { opacity: 0.6; margin-top: 2.5em; }
+    div.footer { font-style: italic; }
+  </style>
+</head>
+<body>
+
+<div class="outhead">
+  <div class="head">
+    <div class="inhead">
+      <hgroup>
+        <h1>Sorting and searching at the library</h1>
+        <h2>Jason Orendorff, Nashville hack day, 11 August 2012</h2>
+      </hgroup>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+<div class="inbody">
+
+<p>If you ever want to screw over a library, just walk up to any shelf,
+pick up any book, and put it on another shelf where it doesn&rsquo;t belong.</p>
+
+<p>Eventually a librarian will stumble across it,
+see that it&rsquo;s out of place, and pull it off the shelf.
+Until then, that book is hopelessly lost.
+It might as well be on the surface of the moon.
+Finding a needle in a haystack is easy.
+When it comes down to it, needles are not hay.
+Finding one book lost among a million other books?
+That&rsquo;s hard.</p>
+
+<p>The only reason such a thing as a library is possible is that it is
+a gigantic, life-sized, walk-in data structure, tuned for fast lookup.</p>
+
+<p>This post is about searching and sorting,
+two fundamental algorithms of data processing,
+and what the library has to teach us about them.</p>
+
+<section>
+  <h1>Searching</h1>
+
+  <p>Suppose you have a sorted array,
+
+  <pre class="prettyprint">
+  books = [
+      "001.4 Graphs",
+      "001.56 Symbols",
+      <i>...millions of strings...</i>
+      "998.9 Antarctica"
+  ]
+  </pre>
+
+  <p>and you want to find the position of
+  a given value in it.</p>
+
+  <pre>"664.75 Cookies"</pre>
+
+  <p>How do you do that?
+  Well, there&rsquo;s a method for that:</p>
+
+  <pre>books.index("664.75 Cookies")</pre>
+
+  <p>But it checks every item in the array, one by one.
+  That could take a while.
+  Is there a better way?</p>
+
+  <p><a href="https://en.wikipedia.org/wiki/Binary_search">Binary search</a>
+  is the right answer.</p>
+
+  <p>And this algorithm is proven optimal.</p>
+
+  <p>But if the sorted array looks like this</p>
+
+  <figure>
+    <img src="lots-of-books.jpg">
+  </figure>
+
+  <p>and the item you&rsquo;re looking for something like this</p>
+
+  <figure>
+    <img alt="(a slip of paper with '664.7522 Cookies' written on it)" src="call-number.jpg">
+  </figure>
+
+  <p>then it doesn&rsquo;t feel optimal.</p>
+
+  <figure>
+    <img alt="(a sketch of some library shelves with an orange path zigzagging drunkenly from aisle to aisle)"
+         src="binary-search-dramatization.png">
+  </figure>
+
+  <p>The orange path is the path you would take doing binary search. The
+  purple path is what you want to do.</p>
+
+  <p>What&rsquo;s going on here?
+  Why is this optimal algorithm so bad in real life?</p>
+
+  <p>Is it because humans are dumb and slow and make mistakes,
+  whereas computers are smart and fast and dependable,
+  so what works for a computer won&rsquo;t necessarily work for a human?</p>
+
+  <p>I don&rsquo;t think so, because if I were programming a robot
+  to go get books off the shelves,
+  I wouldn&rsquo;t have the robot do a binary search either.
+  A robot doing binary search to find a book
+  would look just as dumb as I would.
+  It really is the wrong algorithm somehow.</p>
+
+  <p>Is it because we&rsquo;re not actually
+  searching a sorted array using comparisons?
+  Well, no, that&rsquo;s exactly what we&rsquo;re doing.</p>
+
+  <p>So, I thought about this, and the best answer I could come up with
+  is that the cost model is wrong.</p>
+
+  <p>Binary search does an optimal number of <em>comparisons</em>.
+  It&rsquo;s only the best algorithm
+  if comparisons are the most significant cost.</p>
+
+  <p>In a library, the books are physically spread out.
+  Most of the time it takes to find a book is not comparisons.
+  It&rsquo;s walking.
+  And this is exactly why binary search feels so dumb:
+  the algorithm makes no effort to minimize your walking.</p>
+
+  <p>There is another factor, which is that librarians do something very clever.
+  They cheat.
+  Or rather, they <a class="sublim" href="http://www.imdb.com/title/tt0084726/quotes?qt=qt0454866">change the problem</a>.</p>
+
+  <p>They put up these signs.</p>
+
+  <figure>
+    <img alt="(signs on the shelves at a library, showing the range of Dewey Decimal codes of the books on each shelf)"
+         src="dewey-signs.jpg">
+  </figure>
+
+  <p>It&rsquo;s just a little extra information.
+  You can look at these signs and before you even start walking,
+  you know which aisle to go to.
+  So before you even begin,
+  you&rsquo;re already doing better than binary search.</p>
+
+  <p>Well, real-life programs do this exact thing in software,
+  and for exactly the same reason.</p>
+
+  <figure>
+    <img alt="(B+ tree illustration)"
+         src="btree.png">
+  </figure>
+
+  <p>Here&rsquo;s a picture of a B+ tree.
+  Filesystems and databases basically all use this data structure
+  or something very similar.
+  You can see there&rsquo;s a hierarchy.
+  The actual sorted data is across the bottom;
+  all this other stuff is just a set of signs telling what&rsquo;s stored where.
+  And all of that is a fraction of the size of the actual data.
+  When you create an index in a database,
+  that tree is what gets created on disk.</p>
+
+  <p>To find something, you start at the top, follow the signs,
+  and in a very small number of hops,
+  you can get to the data you&rsquo;re looking for.</p>
+
+  <p>Now, each hop involves looking a chunk of data
+  and determining which way to go next.
+  It&rsquo;s some code.
+  And if you just ignored the B+ tree and did binary search the data itself,
+  that would be simpler.  It&rsquo;d be less work, fewer CPU instructions.
+  But it touches more pages of memory.
+  Or disk.  More walking around.</p>
+
+  <p>It&rsquo;s easy to forget, but reading data from memory
+  is one of the slowest things a CPU does.
+  A modern CPU can execute hundreds of instructions
+  in the time it takes to load anything from main memory.
+  Going to disk is thousands of times worse.</p>
+</section>
+
+<section>
+  <h1>Sorting</h1>
+
+  <p>Everyone knows how to sort an array, right? There&rsquo;s a method for that.</p>
+
+  <p>Unfortunately, it doesn&rsquo;t work on real-world books.</p>
+
+  <pre>
+  &gt;&gt;&gt; <kbd>(<img alt="cart full of books" src="book-cart.jpg">).sort()</kbd>
+  <span class="error">TypeError</span>
+  </pre>
+
+  <p>So the library must
+  <a class="sublim" href="https://en.wikipedia.org/wiki/Chinese_room">know</a>
+  how to sort.
+  I mean, they&rsquo;re not programmers there.
+  But institutionally, the sorting algorithm must be there somewhere.</p>
+
+  <p>The standard sort methods are mostly (souped-up) <a href="">merge sorts</a>.
+  Merge sort is O(<var>n</var> log <var>n</var>), which is optimal.
+  So to within a small constant factor,
+  on average,
+  if the input is random,
+  merge sort can&rsquo;t be beat.</p>
+
+  <p>But if you&rsquo;re sorting books,
+  don&rsquo;t use merge sort.
+  It&rsquo;s hopeless.</p>
+
+  <p>What the library does is a lot faster.</p>
+
+  <p>When books are returned to the Main library,
+  they take them to a back room and put them on a set of shelves.
+  There are separate shelves for popular fiction, for nonfiction,
+  for children&rsquo;s storybooks, and so on.</p>
+
+  <p>Every once in a while, they take all the kids&rsquo; books,
+  put them on carts,
+  and take them upstairs to the children&rsquo;s department,
+  where they have another set of shelves.</p>
+
+  <figure>
+    <img alt="(mostly empty bookshelves in some back room at the library)"
+         src="shelves.jpg">
+  </figure>
+
+  <p>Same deal, only more fine-grained this time.
+  These are the nonfiction shelves;
+  you can&rsquo;t see, but they&rsquo; labeled with Dewey Decimal numbers:
+  100s, 200s, and so on.</p>
+
+  <p>If you squint a little bit, you can see
+  the beginning of a sorting algorithm here.
+  Divide the data set into piles based on the first letter or first digit.</p>
+
+  <p>It turns out that there&rsquo;s a standard name for this algorithm.
+  It&rsquo;s called <a title="Wikipedia: Bucket sort"
+  href="https://en.wikipedia.org/wiki/Bucket_sort">bucket sort</a>.
+  It is in fact faster than merge sort, because&mdash;well,
+  let&rsquo;s put it this way.
+  It&rsquo;s almost exactly merge sort.
+  But without all the annoying merging.</p>
+
+  <figure>
+    <table>
+      <tr>
+        <th>merge sort</th>
+        <th>bucket sort</th>
+      </tr>
+
+      <tr>
+        <td>1. divide (in half)</td>
+        <td>1. divide (in bins)</td>
+      </tr>
+
+      <tr>
+        <td>2. sort halves</td>
+        <td>2. sort bins</td>
+      </tr>
+
+      <tr>
+        <td>3. merge</td>
+        <td>3. <s>merge</s> <em>done!</em></td>
+      </tr>
+    </table>
+  </figure>
+
+  <p>Instead of dividing the items arbitrarily,
+  you&rsquo;re dividing them into groups, so that when you get to the end of step 2&mdash;
+  the 100s are sorted, the 200s are sorted, and so on&mdash;
+  you&rsquo;re done.</p>
+
+  <p>How is it possible for bucket sort to beat a provably optimal algorithm?
+  Well, merge sort is as good as you can do <em>using only comparisons</em>.
+  Bucket sort is cheating, because in step 1, it&rsquo;s partially sorting
+  the data without doing any comparisons at all.
+  It can do that because the key we&rsquo;re sorting on
+  happens to be made of letters or digits.
+  Bucket sort exploits this fact; merge sort doesn&rsquo;t.</p>
+
+  <p>I should point out that bucket sort has pretty awful worst-case performance.
+  You can get all the way through step 1 only to realize
+  that all your keys started with the same letter, 
+  and so they all ended up in the same bucket,
+  so you basically haven&rsquo;t accomplished anything!
+  This doesn&rsquo;t happen to the library in practice, though.</p>
+
+  <p>Of course we&rsquo;ve ignored the remaining problem&mdash;how do you sort the bins?
+  And the answer is, however you want. You could bucket sort them.
+  It could be bucket sorts all the way down.</p>
+
+  <p>But of course the library doesn&rsquo;t do that.
+  Because they have something even faster!</p>
+
+  <p>How do ordinary people sort stuff?
+  Most of us are not terribly systematic about it, which is fine;
+  we use a few different techniques sort of at random.
+  But one of the main techniques that you&rsquo;ll see people use again and again
+  is what&rsquo;s called
+  <a title="Wikipedia: Insertion sort"
+  href="https://en.wikipedia.org/wiki/Insertion_sort">insertion sort</a>.
+  If you&rsquo;re like me, you probably learned about insertion sort in school
+  and then promptly forgot about it because it&rsquo;s O(<var>n</var><sup>2</sup>).
+  Which means it&rsquo;s incredibly slow, right?
+  Yeah, about that.
+  Insertion sort is actually really fast.
+  Under the right conditions.</p>
+
+  <figure>
+    <iframe src="http://player.vimeo.com/video/47384697" width="640" height="360" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+  </figure>
+
+  <p>This is a movie of me doing insertion sort on some books.
+  I&rsquo;m sorting them by color, so in the end we&rsquo;ll get a nice rainbow.
+  It&rsquo;s really simple.
+  You just put all the unsorted items in a pile on the right,
+  and you take them one by one and put them into the output array on the left.
+  Just insert each item in the place where it belongs so that you keep
+  the output array sorted as you build it.</p>
+
+  <p>This is the fastest sorting algorithm <em>for small arrays</em>,
+  up to maybe 20, 30 elements. Even in software!
+  The only reason this sort is slow for larger arrays
+  is that when a computer inserts an item into an array,
+  it has to move all the other items to the right, one by one, to make room.</p>
+
+  <p>But you can see,
+  inserting a book into a spot on a shelf is pretty fast.
+  You just stick your fingers in there and slide everything over at once.</p>
+
+  <p>So not only is insertion sort the fastest algorithm for sorting small arrays,
+  it&rsquo;s <em>even better suited</em> to sorting physical books.
+  Again, due to costs.</p>
+</section>
+
+<section>
+  <h2>Pluggable algorithms</h2>
+
+  <p>The library&rsquo;s doing something kind of cool here.
+  I never really thought about it before,
+  but these divide-and-conquer algorithms: they&rsquo;re pluggable.</p>
+
+  <p>The library is taking advantage of this.
+  They use bucket sort, but not obsessively.
+  Once they reach the point of diminishing returns,
+  they switch over to insertion sort,
+  which is faster for sorting small arrays.</p>
+
+  <p>Standard library sort routines do exactly the same thing.
+  Most of them use merge sort, which in its purest form looks something like this:</p>
+
+  <figure>
+    <img alt="(a very branchy binary tree, root at the top, all brown)"
+         src="tree-1.png">
+  </figure>
+
+  <p>But once they subdivide the problem down to pieces of, say, 20 items or less,
+  they use insertion sort for those.</p>
+
+  <figure>
+    <img alt="(a not-very-branchy binary tree, root at the top, brown branches, green rectangles at the leaves)"
+         src="tree-2.png">
+  </figure>
+
+  <p>Some libraries go one step further,
+  and if the array is truly unmanageably enormous,
+  they&rsquo;ll start out using
+  <a title="Wikipedia: Quicksort" href="https://en.wikipedia.org/wiki/Quicksort">quicksort</a>,
+  which is better for huge arrays.
+  The problem with merge sort for big data is that it needs
+  some temp space to work efficiently.
+  Allocating gigabytes of memory can be bad.
+  Quicksort can sort an array in place.</p>
+
+  <figure>
+    <img alt="(a huge binary tree, root at the top, blue for the top branches, brown for most of the branches below, hundreds of tiny green rectangles at the leaves)"
+         src="tree-3.png">
+  </figure>
+
+  <p>Quicksort is a divide-and-conquer algorithm too.
+  Once it divides the data into manageable pieces,
+  it can switch to merge sort,
+  which will keep breaking up the data,
+  and eventually switch to insertion sort.</p>
+</section>
+
+<section>
+  <h2>Conclusion</h2>
+
+  <p>If there&rsquo;s a theme here, it is that the library is doing things
+  that are recongizable as algorithms from computer science.
+  But not the obvious textbook algorithms!
+  I guess when an algorithm is going to take up a human being&rsquo;s time,
+  it tends to get optimized.
+  These algorithms seem to be tuned very well indeed.
+  But perhaps if you looked inside any organization
+  you&rsquo;d find something similar.</p>
+
+  <p>I wanted to share this because thinking about these things
+  gave me just a slightly different perspective on programming.
+  I just gave the library two hours a week this summer,
+  as a volunteer, putting books on the shelves,
+  and it turned out to be unexpectedly rewarding.</p>
+
+  <p>And humbling.
+  When I started at the library,
+  there was this moment, embarrassing now in hindsight,
+  when I thought, hey, I know information systems.
+  I could teach the library a thing or two!
+  But of course, predictably, it turned out
+  the library had something to teach me.</p>
+
+  <p>I don&rsquo;t feel too bad about it though.
+  Librarians have been in the IT game for a long, long time.</p>
+
+  <figure>
+    <a href="http://heritage-key.com/world/sumerian-library-catalogue"><img src="sumerian-index.png"></a>
+  </figure>
+
+  <p>One more little thing.
+  The Nashville Public Library has a great volunteer program.
+  And they have interesting projects for web developers.
+  <a href="http://library.nashville.org/volunteer/">They could use your talents.</a></p>
+
+  <p>Or you could just put books on the shelves. Like me.
+  It&rsquo;s about as exciting as it sounds,
+  but I promise you this:
+  you will read a book that you wouldn&rsquo;t read otherwise.</p>
+
+  <figure>
+    <img src="finis.jpg" alt="Finis">
+  </figure>
+</section>
+
+<hr />
+
+<div class="footer">
+  <p><strong>Jason Orendorff</strong> hacks C++ for Mozilla, working on the JavaScript engine in Firefox.
+  He lives on a ridge north of Nashville.
+  He&rsquo;s interested in math, education, and time travel.
+  This talk was written for
+  <a href="https://github.com/jorendorff/jorendorff.github.com/wiki/Nashville-hack-day">Nashville hack day</a>.</p>
+
+  <p>If you&rsquo;d like to give this talk,
+  feel free to use <a href="https://speakerdeck.com/u/jorendorff/p/sorting-and-searching-at-the-library">the slides</a> (PDF).</p>
+</div>
+
+</div>
+</div>
+</body>
+</html>
