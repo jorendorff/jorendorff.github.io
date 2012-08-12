@@ -1,0 +1,3 @@
+[submodule "hackday/2012/things"]
+	path = hackday/2012/things
+	url = git://github.com/elizabrock/presentation_nashville_hack_day.git
