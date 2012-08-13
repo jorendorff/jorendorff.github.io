@@ -5,24 +5,21 @@
   <link href='http://fonts.googleapis.com/css?family=Loved+by+the+King' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Cutive' rel='stylesheet' type='text/css'>
   <style>
-    section#main {
-        font-size: 64px;
-        text-align: center;
-        font-family: 'Loved by the King'; /* use browser's default font as fallback */
-    }
-    section#main em { font-style: normal; text-transform: uppercase; }
-    section#main li { display: block; list-style: none; }
-    section#more {
+    body {
         font-size: 18px;
         font-family: Cutive, serif;
         line-height: 1.5em;
         margin: 0 12% 3em;
     }
-    section#more strong {
+    h1, h2 {
+        text-align: center;
+        font-family: 'Loved by the King'; /* use browser's default font as fallback */
         font-weight: normal;
-        font-style: italic;
-        text-transform: uppercase;
+        margin-top: 1.5em;
     }
+    h1 { font-size: 5em; }
+    h2 { font-size: 2em; line-height: 1.5em; }
+
     p.hrule { text-align: center; }
     div.warning {
         text-align: center;
@@ -33,47 +30,34 @@
   </style>
 </head>
 <body>
-  <section id="main">
-    <p>Nashville hack day - August 11, 2012</p>
-    <ul>
-      <li><em>Lightning talks</em> in the morning</li>
-      <li><em>Lunch</em> catered in</li>
-      <li><em>Hack time</em> in the afternoon</li>
-    </ul>
-  </section>
-  <section id="more">
-    <div class="warning">
-      <p>Hack day is free to attend, but <strong>space is limited</strong>.&nbsp;
-        <a href="mailto:jason.orendorff@gmail.com?subject=Nashville%20hack%20day">Send email</a>
-        or tweet @jorendorff to reserve your spot.</p>
-    </div>
-    <p>What: A one-day community event by Nashville developers for Nashville developers.</p>
-    <p>When: 9 A.M. Saturday, August 11</p>
-    <p>Where: centresource (<a href="https://maps.google.com/?q=centresource+1313+4th+Ave+N+Nashville,+TN+37208">map</a>)</p>
-    <p>So far, we&rsquo;ve got short talks about:</p>
-    <ul id="shuffleme">
-      <li>storing and searching a petabyte of data</li>
-      <li>creating and maintaining an open source project</li>
-      <li>algorithms that librarians execute in their brains</li>
-      <li>starting work in a completely unfamiliar codebase</li>
-      <li>the nuts and bolts of consulting</li>
-      <li>&hellip;and more (and the talks aren&rsquo;t even the fun part)</li>
-    </ul>
-    <script>
-      // shuffle the list items, just for fun
-      (function () {
-          var list = document.getElementById("shuffleme");
-          var n = list.children.length - 1;
-          for (var i = 0; i < n; i++) {
-              var k = i + Math.floor(Math.random() * (n - i));
-              list.insertBefore(list.children[k], list.children[0]);
-          }
-      })();
-    </script>
-    <p class="hrule">~</p>
-    <p>Generously sponsored, hosted, and caffeinated by the amazing people at
-      <a href="http://www.centresource.com/">centresource</a>.</p>
-    <p><a href="conduct.html">Hack day code of conduct</a></p>
-  </section>
+  <h1>Nashville hack day</h1>
+  <h2>a free one-day community event by Nashville developers for Nashville developers</h2>
+
+  <p>On August 11, 2012,
+  eleven speakers gave short tech talks to a packed house
+  at <a href="http://www.centresource.com/">centresource</a>.
+  We had lunch catered in.
+  We chatted,
+  hacked on IRC bots,
+  debugged bash scripts,
+  did Ruby koans,
+  and tried to explain git to each other.
+  It was a blast.</p>
+
+  <p><strong>Thank you</strong> to everyone who came out.</p>
+
+  <p><a href="https://github.com/jorendorff/jorendorff.github.com/wiki/Nashville-hack-day">All the talks</a> -
+  slides, links, source code, and more.</p>
+
+  <p>Sound like fun?
+  <a href="mailto:jason.orendorff@gmail.com?subject=Nashville%20hack%20day">Send me email</a>
+  or tweet @jorendorff
+  and I&rsquo;ll make sure you know about the next one.</p>
+
+  <p class="hrule">~</p>
+
+  <p>Generously sponsored, hosted, and caffeinated by the amazing people at
+    <a href="http://www.centresource.com/">centresource</a>.</p>
+  <p><a href="conduct.html">Hack day code of conduct</a></p>
 </body>
 <html>
