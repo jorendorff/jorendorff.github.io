@@ -44,6 +44,7 @@
       span.expr { display: inline-block; color: white; background-color: green; border-radius: 0.35em; border: 2px outset #339933; padding: 0.1em 0.3em; margin: 0.1em 0.5em; }
       span.var { display: inline-block; color: black; background-color: #ff8833; border-radius: 0.25em; padding: 0.1em 0.3em 0; border: 2px outset #ff8833; margin: 0 0.5em 0; }
 
+      .srclink { font-size: 14px; }
       ul#options { margin-left: 1em; margin-top: 1em; margin-left: 0; }
       ul#options li { list-style-type: none; }
 
@@ -56,6 +57,7 @@
   <body onload="init()">
     <div id="controls">
       <h1>Compilers 101 Toy Calculator</h1>
+      <p class="srclink"><a href="docs/calculator-parser.html">parser source</a></p>
       <ul id="options">
         <li><label><input type="radio" name="mode" value="calc" checked>calculator mode</label>
         <li><label><input type="radio" name="mode" value="fraction">fraction mode</label>
