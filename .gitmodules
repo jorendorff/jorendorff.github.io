@@ -4,3 +4,6 @@
 [submodule "dropcards"]
 	path = dropcards
 	url = git://github.com/jorendorff/dropcards.git
+[submodule "turtle-wars"]
+	path = turtle-wars
+	url = https://github.com/jorendorff/turtle-wars.git
