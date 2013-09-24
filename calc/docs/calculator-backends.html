@@ -62,7 +62,7 @@ the calculator parser.</p>
               <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <h2>Interpreters</h2>
+              <h2>Code as data</h2>
 
             </div>
             
@@ -75,9 +75,15 @@ the calculator parser.</p>
               <div class="pilwrap for-h3">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <h3>1. Evaluate using floating-point numbers</h3>
+              <h3>1. Show the JSON</h3>
+<p>Let’s make one that builds a tree describing the input formula. This is
+called an abstract syntax tree, or AST.</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">convertToJSON</span><span class="params">(code)</span> {</span>
+    <span class="keyword">return</span> parse(code);
+}</pre></div></div>
             
         </li>
         
@@ -85,29 +91,15 @@ the calculator parser.</p>
         <li id="section-4">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h3">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>This behaves like a stripped-down version of JavaScript <code>eval()</code>.</p>
+              <h3>2. Convert to DOM</h3>
+<p>Of course one of the nice things about JSON is that there are many ways to
+display it. Here’s code that spits out DOM nodes that show how the program
+would look in Scratch. (!)</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">evaluateAsFloat</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> calculator = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span> <span class="keyword">return</span> parseInt(s); },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a + b; },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a - b; },
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a * b; },
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a / b; },
-        _variables: Object.create(<span class="literal">null</span>),
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span> <span class="keyword">return</span> <span class="keyword">this</span>._variables[name] || <span class="number">0</span>; }
-    };
-
-    calculator._variables.e = Math.E;
-    calculator._variables.pi = Math.PI;
-
-    <span class="keyword">return</span> parse(code, calculator);
-}</pre></div></div>
             
         </li>
         
@@ -115,10 +107,238 @@ the calculator parser.</p>
         <li id="section-5">
             <div class="annotation">
               
-              <div class="pilwrap for-h3">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <h3>2. Evaluate using precise fraction arithmetic</h3>
+              <p>Helper function to create DOM elements.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">span</span><span class="params">(className, contents)</span> {</span>
+    <span class="keyword">var</span> e = document.createElement(<span class="string">"span"</span>);
+    e.className = className;
+    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; contents.length; i++) {
+        <span class="keyword">var</span> kid = contents[i];
+        <span class="keyword">if</span> (<span class="keyword">typeof</span> kid === <span class="string">"string"</span>)
+            kid = document.createTextNode(kid);
+        e.appendChild(kid);
+    }
+    <span class="keyword">return</span> e;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">convertToDOM</span><span class="params">(code)</span> {</span>
+    <span class="keyword">var</span> fancyOperator = {
+        <span class="string">"+"</span>: <span class="string">"+"</span>,
+        <span class="string">"-"</span>: <span class="string">"\u2212"</span>,  <span class="comment">// &amp;minus;</span>
+        <span class="string">"*"</span>: <span class="string">"\u00d7"</span>,  <span class="comment">// &amp;times;</span>
+        <span class="string">"/"</span>: <span class="string">"\u00f7"</span>   <span class="comment">// &amp;divide;</span>
+    };
+
+    <span class="function"><span class="keyword">function</span> <span class="title">convert</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:
+            <span class="keyword">return</span> span(<span class="string">"num"</span>, [obj.value]);
+        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>: <span class="keyword">case</span> <span class="string">"*"</span>: <span class="keyword">case</span> <span class="string">"/"</span>:
+            <span class="keyword">return</span> span(<span class="string">"expr"</span>, [convert(obj.left),
+                                 fancyOperator[obj.type],
+                                 convert(obj.right)]);
+        <span class="keyword">case</span> <span class="string">"name"</span>:
+            <span class="keyword">return</span> span(<span class="string">"var"</span>, [obj.id]);
+        }
+    }
+    <span class="keyword">return</span> convert(parse(code));
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <h3>3. MathML output</h3>
+<p>One more riff on this theme: How about generating beautiful MathML output?
+(Unfortunately, some browsers still do not support MathML. Firefox does.)</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>The hardest part of this was figuring out how to make MathML elements.
+Here’s some code to help with that.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> mathml = <span class="string">"http://www.w3.org/1998/Math/MathML"</span>;
+
+<span class="function"><span class="keyword">function</span> <span class="title">mo</span><span class="params">(s)</span> {</span>
+    <span class="keyword">var</span> e = document.createElementNS(mathml, <span class="string">"mo"</span>);
+    <span class="keyword">var</span> t = document.createTextNode(s);
+    e.appendChild(t);
+    <span class="keyword">return</span> {prec: <span class="number">3</span>, element: e};
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Create a new MathML DOM element of the specified type and contents.
+<code>precedence</code> is used to determine whether or not to add parentheses around
+any of the contents. If it’s <code>null</code>, no parentheses are added.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">make</span><span class="params">(name, precedence, contents)</span> {</span>
+    <span class="keyword">var</span> e = document.createElementNS(mathml, name);
+    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; contents.length; i++) {
+        <span class="keyword">var</span> kid = contents[i];
+        <span class="keyword">var</span> node;
+
+        <span class="keyword">if</span> (<span class="keyword">typeof</span> kid === <span class="string">"string"</span>) {
+            node = document.createTextNode(kid);
+        } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>If precedence is non-null and higher than this child’s
+precedence, wrap the child in parentheses.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (precedence !== <span class="literal">null</span>
+                &amp;&amp; (kid.prec &lt; precedence
+                    || (kid.prec == precedence &amp;&amp; i != <span class="number">0</span>)))
+            {
+                kid = make(<span class="string">"mrow"</span>, <span class="literal">null</span>, [mo(<span class="string">"("</span>), kid, mo(<span class="string">")"</span>)]);
+            }
+            node = kid.element;
+        }
+        e.appendChild(node);
+    }
+    <span class="keyword">if</span> (precedence === <span class="literal">null</span>)
+        precedence = <span class="number">3</span>;
+    <span class="keyword">return</span> {prec: precedence, element: e};
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">convertToMathML</span><span class="params">(code)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">convert</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:
+            <span class="keyword">return</span> make(<span class="string">"mn"</span>, <span class="number">3</span>, [obj.value]);
+        <span class="keyword">case</span> <span class="string">"name"</span>:
+            <span class="keyword">return</span> make(<span class="string">"mi"</span>, <span class="number">3</span>, [obj.id]);
+        <span class="keyword">case</span> <span class="string">"+"</span>:
+            <span class="keyword">return</span> make(<span class="string">"mrow"</span>, <span class="number">1</span>, [convert(obj.left),
+                                    make(<span class="string">"mo"</span>, <span class="number">3</span>, [<span class="string">"+"</span>]),
+                                    convert(obj.right)]);
+        <span class="keyword">case</span> <span class="string">"-"</span>:
+            <span class="keyword">return</span> make(<span class="string">"mrow"</span>, <span class="number">1</span>, [convert(obj.left),
+                                    make(<span class="string">"mo"</span>, <span class="number">3</span>, [<span class="string">"-"</span>]),
+                                    convert(obj.right)]);
+        <span class="keyword">case</span> <span class="string">"*"</span>:
+            <span class="keyword">return</span> make(<span class="string">"mrow"</span>, <span class="number">2</span>, [convert(obj.left),
+                                    convert(obj.right)]);
+        <span class="keyword">case</span> <span class="string">"/"</span>:
+            <span class="keyword">return</span> make(<span class="string">"mfrac"</span>, <span class="literal">null</span>, [convert(obj.left), convert(obj.right)]);
+        }
+    };
+    <span class="keyword">var</span> e = convert(parse(code));
+    <span class="keyword">return</span> make(<span class="string">"math"</span>, <span class="literal">null</span>, [e]);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <h2>Interpreters</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <h3>4. Evaluate using floating-point numbers</h3>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Now let’s try actually performing some computation using the program we
+read. This behaves like a stripped-down version of JavaScript <code>eval()</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">evaluateAsFloat</span><span class="params">(code)</span> {</span>
+    <span class="keyword">var</span> variables = Object.create(<span class="literal">null</span>);
+    variables.e = Math.E;
+    variables.pi = Math.PI;
+
+    <span class="function"><span class="keyword">function</span> <span class="title">evaluate</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:  <span class="keyword">return</span> parseInt(obj.value);
+        <span class="keyword">case</span> <span class="string">"name"</span>:  <span class="keyword">return</span> variables[obj.id] || <span class="number">0</span>;
+        <span class="keyword">case</span> <span class="string">"+"</span>:  <span class="keyword">return</span> evaluate(obj.left) + evaluate(obj.right);
+        <span class="keyword">case</span> <span class="string">"-"</span>:  <span class="keyword">return</span> evaluate(obj.left) - evaluate(obj.right);
+        <span class="keyword">case</span> <span class="string">"*"</span>:  <span class="keyword">return</span> evaluate(obj.left) * evaluate(obj.right);
+        <span class="keyword">case</span> <span class="string">"/"</span>:  <span class="keyword">return</span> evaluate(obj.left) / evaluate(obj.right);
+        }
+    }
+    <span class="keyword">return</span> evaluate(parse(code));
+}
+
+assert.strictEqual(evaluateAsFloat(<span class="string">"2 + 2"</span>), <span class="number">4</span>);
+assert.strictEqual(evaluateAsFloat(<span class="string">"3 * 4 * 5"</span>), <span class="number">60</span>);
+assert.strictEqual(evaluateAsFloat(<span class="string">"5 * (2 + 2)"</span>), <span class="number">20</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <h3>5. Evaluate using precise fraction arithmetic</h3>
 <p>Our little language is a tiny subset of JavaScript. But that doesn’t meant
 it has to behave exactly like JavaScript. This is our language.
 It can behave however we want.</p>
@@ -128,11 +348,11 @@ It can behave however we want.</p>
         </li>
         
         
-        <li id="section-6">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>So how about a calculator that does arbitrary precision arithmetic?
 Let’s start by defining a <code>Fraction</code> class...</p>
@@ -154,7 +374,7 @@ Let’s start by defining a <code>Fraction</code> class...</p>
 <span class="function"><span class="keyword">function</span> <span class="title">Fraction</span><span class="params">(n, d)</span> {</span>
     <span class="keyword">if</span> (d === <span class="literal">undefined</span>)
         d = <span class="keyword">new</span> BigInteger(<span class="number">1</span>);
-    <span class="keyword">var</span> x = gcd(n, d);
+    <span class="keyword">var</span> x = gcd(n.abs(), d);  <span class="comment">// Simplify the fraction.</span>
     <span class="keyword">this</span>.n = n.divide(x);
     <span class="keyword">this</span>.d = d.divide(x);
 }</pre></div></div>
@@ -162,11 +382,11 @@ Let’s start by defining a <code>Fraction</code> class...</p>
         </li>
         
         
-        <li id="section-7">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>…and some Fraction methods. You learned these techniques in grade school,
 though you may have forgotten some of them.</p>
@@ -202,11 +422,11 @@ though you may have forgotten some of them.</p>
         </li>
         
         
-        <li id="section-8">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Now simply write an <code>out</code> object that computes the results using <code>Fraction</code>
 objects rather than JavaScript numbers. It’s almost too easy.</p>
@@ -214,25 +434,27 @@ objects rather than JavaScript numbers. It’s almost too easy.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">evaluateAsFraction</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> fractionCalculator = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span> <span class="keyword">return</span> <span class="keyword">new</span> Fraction(<span class="keyword">new</span> BigInteger(s)); },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a.add(b); },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a.sub(b); },
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a.mul(b); },
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> a.div(b); },
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span> <span class="keyword">throw</span> <span class="keyword">new</span> SyntaxError(<span class="string">"no variables in fraction mode, sorry"</span>); }
-    };
-    <span class="keyword">return</span> parse(code, fractionCalculator);
+    <span class="function"><span class="keyword">function</span> <span class="title">evaluate</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:  <span class="keyword">return</span> <span class="keyword">new</span> Fraction(<span class="keyword">new</span> BigInteger(obj.value));
+        <span class="keyword">case</span> <span class="string">"+"</span>:  <span class="keyword">return</span> evaluate(obj.left).add(evaluate(obj.right));
+        <span class="keyword">case</span> <span class="string">"-"</span>:  <span class="keyword">return</span> evaluate(obj.left).sub(evaluate(obj.right));
+        <span class="keyword">case</span> <span class="string">"*"</span>:  <span class="keyword">return</span> evaluate(obj.left).mul(evaluate(obj.right));
+        <span class="keyword">case</span> <span class="string">"/"</span>:  <span class="keyword">return</span> evaluate(obj.left).div(evaluate(obj.right));
+        <span class="keyword">case</span> <span class="string">"name"</span>:  <span class="keyword">throw</span> <span class="keyword">new</span> SyntaxError(<span class="string">"no variables in fraction mode, sorry"</span>);
+        }
+    }
+    <span class="keyword">return</span> evaluate(parse(code));
 }</pre></div></div>
             
         </li>
         
         
-        <li id="section-9">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Our tiny programming language is suddenly doing something JavaScript itself
 doesn’t do: arithmetic with exact (not floating-point) results.  Tests:</p>
@@ -243,173 +465,8 @@ doesn’t do: arithmetic with exact (not floating-point) results.  Tests:</p>
 assert.strictEqual(evaluateAsFraction(<span class="string">"(2/3) * (3/2)"</span>).toString(), <span class="string">"1"</span>);
 assert.strictEqual(evaluateAsFraction(<span class="string">"1/7 + 4/7 + 2/7"</span>).toString(), <span class="string">"1"</span>);
 assert.strictEqual(
-    evaluateAsFraction(<span class="string">"5996788328646786302319492/2288327879043508396784319"</span>).toString(),
+    evaluateAsFraction(<span class="string">"5996788328646786302319492 / 2288327879043508396784319"</span>).toString(),
     <span class="string">"324298349324/123749732893"</span>);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-              <h2>Code as data</h2>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-11">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h3">
-                <a class="pilcrow" href="#section-11">&#182;</a>
-              </div>
-              <h3>3. Convert to DOM</h3>
-<p>Both examples above compute a result.  But that isn’t the only thing you can
-do with language. Let’s make a program that doesn’t compute anything at all:
-it simply spits out DOM nodes that show how the program would look in
-Scratch. (!)</p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-12">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-              <p>Helper function to create DOM elements.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">span</span><span class="params">(className, contents)</span> {</span>
-    <span class="keyword">var</span> e = document.createElement(<span class="string">"span"</span>);
-    e.className = className;
-    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; contents.length; i++) {
-        <span class="keyword">var</span> kid = contents[i];
-        <span class="keyword">if</span> (<span class="keyword">typeof</span> kid === <span class="string">"string"</span>)
-            kid = document.createTextNode(kid);
-        e.appendChild(kid);
-    }
-    <span class="keyword">return</span> e;
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-13">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
-              <p>Yet another pluggable <code>out</code> object.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">convertToDOM</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> spanBuilder = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span> <span class="keyword">return</span> span(<span class="string">"num"</span>, [s]); },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> span(<span class="string">"expr"</span>, [a, <span class="string">"+"</span>, b]); },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> span(<span class="string">"expr"</span>, [a, <span class="string">"\u2212"</span>, b]); },  <span class="comment">// &amp;minus;</span>
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> span(<span class="string">"expr"</span>, [a, <span class="string">"\u00d7"</span>, b]); },  <span class="comment">// &amp;times;</span>
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> span(<span class="string">"expr"</span>, [a, <span class="string">"\u00f7"</span>, b]); },  <span class="comment">// &amp;divide;</span>
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span> <span class="keyword">return</span> span(<span class="string">"var"</span>, [name]); }
-    };
-    <span class="keyword">return</span> parse(code, spanBuilder);
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h3">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <h3>4. Convert to JSON</h3>
-<p>Let’s make one that builds a tree describing the input formula. This is
-called an abstract syntax tree, or AST. <strong>This is most likely what you would
-do if you planned to make your own programming language.</strong> It was once
-common to parse and emit code in a single pass. Languages were carefully
-designed to make sure that was possible. Today, there’s really no reason not
-to build a complete AST or other intermediate form, then emit code in a
-second pass.</p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <p>Each method simply returns a new JS object.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">convertToAST</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> astBuilder = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span> <span class="keyword">return</span> {type: <span class="string">"number"</span>, value: s}; },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> {type: <span class="string">"add"</span>, left: a, right: b}; },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> {type: <span class="string">"sub"</span>, left: a, right: b}; },
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> {type: <span class="string">"mul"</span>, left: a, right: b}; },
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> {type: <span class="string">"div"</span>, left: a, right: b}; },
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span> <span class="keyword">return</span> {type: <span class="string">"name"</span>, name: name}; }
-    };
-    <span class="keyword">return</span> parse(code, astBuilder);
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-16">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
-              </div>
-              <p>And test it.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>assert.deepEqual(
-    convertToAST(<span class="string">"(1 + 2) / 3"</span>),
-    {
-        type: <span class="string">"div"</span>,
-        left: {
-            type: <span class="string">"add"</span>,
-            left: {type: <span class="string">"number"</span>, value: <span class="string">"1"</span>},
-            right: {type: <span class="string">"number"</span>, value: <span class="string">"2"</span>}
-        },
-        right: {type: <span class="string">"number"</span>, value: <span class="string">"3"</span>}
-    });</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-17">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h3">
-                <a class="pilcrow" href="#section-17">&#182;</a>
-              </div>
-              <h3>5. MathML output</h3>
-<p>One more riff on this theme: How about generating beautiful MathML output?
-(Unfortunately, some browsers still do not support MathML. Firefox does.)</p>
-
-            </div>
             
         </li>
         
@@ -417,22 +474,12 @@ second pass.</p>
         <li id="section-18">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>The hardest part of this was figuring out how to make MathML elements.
-Here’s some code to help with that.</p>
+              <h2>Compilers</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> mathml = <span class="string">"http://www.w3.org/1998/Math/MathML"</span>;
-
-<span class="function"><span class="keyword">function</span> <span class="title">mo</span><span class="params">(s)</span> {</span>
-    <span class="keyword">var</span> e = document.createElementNS(mathml, <span class="string">"mo"</span>);
-    <span class="keyword">var</span> t = document.createTextNode(s);
-    e.appendChild(t);
-    <span class="keyword">return</span> {prec: <span class="number">3</span>, element: e};
-}</pre></div></div>
             
         </li>
         
@@ -440,24 +487,12 @@ Here’s some code to help with that.</p>
         <li id="section-19">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h3">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>Create a new MathML DOM element of the specified type and contents.
-<code>precedence</code> is used to determine whether or not to add parentheses around
-any of the contents. If it’s <code>null</code>, no parentheses are added.</p>
+              <h3>6. JavaScript function output</h3>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">make</span><span class="params">(name, precedence, contents)</span> {</span>
-    <span class="keyword">var</span> e = document.createElementNS(mathml, name);
-    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; contents.length; i++) {
-        <span class="keyword">var</span> kid = contents[i];
-        <span class="keyword">var</span> node;
-
-        <span class="keyword">if</span> (<span class="keyword">typeof</span> kid === <span class="string">"string"</span>) {
-            node = document.createTextNode(kid);
-        } <span class="keyword">else</span> {</pre></div></div>
             
         </li>
         
@@ -468,38 +503,19 @@ any of the contents. If it’s <code>null</code>, no parentheses are added.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>If precedence is non-null and higher than this child’s
-precedence, wrap the child in parentheses.</p>
+              <p>This is just to show some very basic code generation.</p>
+<p>Code generation for a real compiler will be harder, because the target
+language is typically quite a bit different from the source language. Here
+they are virtually identical, so code generation is very easy.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (precedence !== <span class="literal">null</span>
-                &amp;&amp; (kid.prec &lt; precedence
-                    || (kid.prec == precedence &amp;&amp; i != <span class="number">0</span>)))
-            {
-                kid = make(<span class="string">"mrow"</span>, <span class="literal">null</span>, [mo(<span class="string">"("</span>), kid, mo(<span class="string">")"</span>)]);
-            }
-            node = kid.element;
-        }
-        e.appendChild(node);
-    }
-    <span class="keyword">if</span> (precedence === <span class="literal">null</span>)
-        precedence = <span class="number">3</span>;
-    <span class="keyword">return</span> {prec: precedence, element: e};
-}
-
-<span class="function"><span class="keyword">function</span> <span class="title">convertToMathML</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> mathmlBuilder = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span> <span class="keyword">return</span> make(<span class="string">"mn"</span>, <span class="number">3</span>, [s]); },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> make(<span class="string">"mrow"</span>, <span class="number">1</span>, [a, make(<span class="string">"mo"</span>, <span class="number">3</span>, [<span class="string">"+"</span>]), b]); },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> make(<span class="string">"mrow"</span>, <span class="number">1</span>, [a, make(<span class="string">"mo"</span>, <span class="number">3</span>, [<span class="string">"-"</span>]), b]); },
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> make(<span class="string">"mrow"</span>, <span class="number">2</span>, [a, b]); },
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> make(<span class="string">"mfrac"</span>, <span class="literal">null</span>, [a, b]); },
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span> <span class="keyword">return</span> make(<span class="string">"mi"</span>, <span class="number">3</span>, [name]); }
-    };
-    <span class="keyword">var</span> e = parse(code, mathmlBuilder);
-    <span class="keyword">return</span> make(<span class="string">"math"</span>, <span class="literal">null</span>, [e]);
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">compileToJSFunction</span><span class="params">(code)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">emit</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:
+            <span class="keyword">return</span> obj.value;
+        <span class="keyword">case</span> <span class="string">"name"</span>:</pre></div></div>
             
         </li>
         
@@ -507,12 +523,28 @@ precedence, wrap the child in parentheses.</p>
         <li id="section-21">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
-              <h2>Compilers</h2>
+              <p>Only allow the name &quot;x&quot;.</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (obj.id !== <span class="string">"x"</span>)
+                <span class="keyword">throw</span> SyntaxError(<span class="string">"only the name 'x' is allowed"</span>);
+            <span class="keyword">return</span> obj.id;
+        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>: <span class="keyword">case</span> <span class="string">"*"</span>: <span class="keyword">case</span> <span class="string">"/"</span>:
+            <span class="keyword">return</span> <span class="string">"("</span> + emit(obj.left) + <span class="string">" "</span> + obj.type + <span class="string">" "</span> + emit(obj.right) + <span class="string">")"</span>;
+        }
+    }
+
+    <span class="keyword">return</span> Function(<span class="string">"x"</span>, <span class="string">"return "</span> + emit(parse(code)) + <span class="string">";"</span>);
+}
+
+assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">1</span>), <span class="number">0</span>);
+assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">2</span>), <span class="number">1</span>);
+assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">3</span>), <span class="number">4</span>);
+assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">4</span>), <span class="number">9</span>);</pre></div></div>
             
         </li>
         
@@ -523,7 +555,7 @@ precedence, wrap the child in parentheses.</p>
               <div class="pilwrap for-h3">
                 <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
-              <h3>6. JavaScript function output</h3>
+              <h3>7. Complex function output</h3>
 
             </div>
             
@@ -536,74 +568,8 @@ precedence, wrap the child in parentheses.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
-              <p>This is just to show some very basic code generation.</p>
-<p>Code generation for a real compiler will be harder, because the target
-language is typically quite a bit different from the source language. Here
-they are virtually identical, so code generation is very easy.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">compileToJSFunction</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> jsFunctionBuilder = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span> <span class="keyword">return</span> s; },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> <span class="string">"("</span> + a + <span class="string">" + "</span> + b + <span class="string">")"</span>; },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> <span class="string">"("</span> + a + <span class="string">" - "</span> + b + <span class="string">")"</span>; },
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> <span class="string">"("</span> + a + <span class="string">" * "</span> + b + <span class="string">")"</span>; },
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span> <span class="keyword">return</span> <span class="string">"("</span> + a + <span class="string">" / "</span> + b + <span class="string">")"</span>; },
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-24">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
-              </div>
-              <p>Only allow the name &quot;x&quot;.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (name !== <span class="string">"x"</span>)
-                <span class="keyword">throw</span> SyntaxError(<span class="string">"only the name 'x' is allowed"</span>);
-            <span class="keyword">return</span> name;
-        }
-    };
-
-    <span class="keyword">var</span> code = parse(code, jsFunctionBuilder);
-    <span class="keyword">return</span> Function(<span class="string">"x"</span>, <span class="string">"return "</span> + code + <span class="string">";"</span>);
-}
-
-assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">1</span>), <span class="number">0</span>);
-assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">2</span>), <span class="number">1</span>);
-assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">3</span>), <span class="number">4</span>);
-assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</span>)(<span class="number">4</span>), <span class="number">9</span>);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-25">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h3">
-                <a class="pilcrow" href="#section-25">&#182;</a>
-              </div>
-              <h3>7. Complex function output</h3>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-26">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
-              </div>
               <p>This one returns a JS function that operates on complex numbers.</p>
-<p>TODO - explain what is going on here.</p>
+<p>Here is a more advanced example of code generation.</p>
 
             </div>
             
@@ -614,34 +580,30 @@ assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</spa
         <span class="keyword">return</span> <span class="string">"tmp"</span> + nextTmpId++;
     }
 
-    <span class="keyword">var</span> complexFunctionBuilder = {
-        number: <span class="function"><span class="keyword">function</span> <span class="params">(s)</span> {</span>
-            <span class="keyword">return</span> { setup: <span class="string">""</span>, re: s, im: <span class="string">"0"</span> };
-        },
-        add: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">emit</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:
+            <span class="keyword">return</span> { setup: <span class="string">""</span>, re: obj.value, im: <span class="string">"0"</span> };
+
+        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>:
+            <span class="keyword">var</span> a = emit(obj.left), b = emit(obj.right);
             <span class="keyword">return</span> {
                 setup: a.setup + b.setup,
-                re: a.re + <span class="string">" + "</span> + b.re,
-                im: a.im + <span class="string">" + "</span> + b.im
+                re: a.re + <span class="string">" "</span> + obj.type + <span class="string">" ("</span> + b.re + <span class="string">")"</span>,
+                im: a.im + <span class="string">" "</span> + obj.type + <span class="string">" ("</span> + b.im + <span class="string">")"</span>
             };
-        },
-        sub: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span>
-            <span class="keyword">return</span> {
-                setup: a.setup + b.setup,
-                re: a.re + <span class="string">" - "</span> + b.re,
-                im: a.im + <span class="string">" - "</span> + b.im
-            };
-        },
-        mul: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span></pre></div></div>
+
+        <span class="keyword">case</span> <span class="string">"*"</span>:
+            <span class="keyword">var</span> a = emit(obj.left), b = emit(obj.right);</pre></div></div>
             
         </li>
         
         
-        <li id="section-27">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>This requires some setup.  First write some code to store the
 real and imaginary parts of a and b in temporary variables.
@@ -660,11 +622,11 @@ don’t want to compute them twice.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Now return the setup, along with expressions for computing the
 real and imaginary parts of (a * b).</p>
@@ -676,17 +638,18 @@ real and imaginary parts of (a * b).</p>
                 re: <span class="string">"A_re * B_re - A_im * B_im"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp),
                 im: <span class="string">"A_re * B_im + A_im * B_re"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp)
             };
-        },
-        div: <span class="function"><span class="keyword">function</span> <span class="params">(a, b)</span> {</span></pre></div></div>
+
+        <span class="keyword">case</span> <span class="string">"/"</span>:
+            <span class="keyword">var</span> a = emit(obj.left), b = emit(obj.right);</pre></div></div>
             
         </li>
         
         
-        <li id="section-29">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Just as for multiplication, first write some code to store the real
 and imaginary parts of a and b in temporary variables.</p>
@@ -705,22 +668,21 @@ and imaginary parts of a and b in temporary variables.</p>
                 re: <span class="string">"(A_re * B_re + A_im * B_im) / T"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp).replace(<span class="regexp">/T/g</span>, tmp),
                 im: <span class="string">"(A_im * B_re - A_re * B_im) / T"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp).replace(<span class="regexp">/T/g</span>, tmp)
             };
-        },
-        name: <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span>
-            <span class="keyword">if</span> (name === <span class="string">"i"</span>)
+
+        <span class="keyword">case</span> <span class="string">"name"</span>:
+            <span class="keyword">if</span> (obj.id === <span class="string">"i"</span>)
                 <span class="keyword">return</span> {setup: <span class="string">""</span>, re: <span class="string">"0"</span>, im: <span class="string">"1"</span>};
-            <span class="keyword">if</span> (name !== <span class="string">"z"</span>)
-                <span class="keyword">throw</span> SyntaxError(<span class="string">"undefined variable: "</span> + name);
+            <span class="keyword">if</span> (obj.id !== <span class="string">"z"</span>)
+                <span class="keyword">throw</span> SyntaxError(<span class="string">"undefined variable: "</span> + obj.id);
             <span class="keyword">return</span> {
                 setup: <span class="string">""</span>,
-                re: name + <span class="string">"_re"</span>,
-                im: name + <span class="string">"_im"</span>
+                re: obj.id + <span class="string">"_re"</span>,
+                im: obj.id + <span class="string">"_im"</span>
             };
         }
-    };
+    }
 
-    <span class="keyword">var</span> result = parse(code, complexFunctionBuilder);
-    <span class="keyword">var</span> tmp = genName();
+    <span class="keyword">var</span> result = emit(parse(code));
     <span class="keyword">var</span> code =
         result.setup +
         <span class="string">"return {re: "</span> + result.re + <span class="string">", im: "</span> + result.im + <span class="string">"};\n"</span>;
@@ -735,17 +697,16 @@ and imaginary parts of a and b in temporary variables.</p>
          "z_im = " + result.im + ";\n" +
          "z_re = " + tmp + ";\n" +
     */</span>
-
 }</pre></div></div>
             
         </li>
         
         
-        <li id="section-30">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>The last bit of code here simply stores all seven back ends in one place
 where other code can get to them.</p>
@@ -753,11 +714,11 @@ where other code can get to them.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> parseModes = {
+    json: convertToJSON,
+    blocks: convertToDOM,
+    mathml: convertToMathML,
     calc: evaluateAsFloat,
     fraction: evaluateAsFraction,
-    blocks: convertToDOM,
-    json: convertToAST,
-    mathml: convertToMathML,
     graph: compileToJSFunction,
     complex: compileToComplexFunction
 };</pre></div></div>
