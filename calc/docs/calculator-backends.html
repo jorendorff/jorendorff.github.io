@@ -815,13 +815,13 @@ to a pair of expressions on floating-point numbers.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">lower</span><span class="params">(obj)</span> {</span>
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">ast_to_ir</span><span class="params">(obj)</span> {</span>
         <span class="keyword">switch</span> (obj.type) {
         <span class="keyword">case</span> <span class="string">"number"</span>:
             <span class="keyword">return</span> {re: num(obj.value), im: num(<span class="string">"0"</span>)};
 
         <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>:
-            <span class="keyword">var</span> a = lower(obj.left), b = lower(obj.right);
+            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
             <span class="keyword">var</span> f = (obj.type === <span class="string">"+"</span> ? add : sub);
             <span class="keyword">return</span> {
                 re: f(a.re, b.re),
@@ -829,14 +829,14 @@ to a pair of expressions on floating-point numbers.</p>
             };
 
         <span class="keyword">case</span> <span class="string">"*"</span>:
-            <span class="keyword">var</span> a = lower(obj.left), b = lower(obj.right);
+            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
             <span class="keyword">return</span> {
                 re: sub(mul(a.re, b.re), mul(a.im, b.im)),
                 im: add(mul(a.re, b.im), mul(a.im, b.re))
             };
 
         <span class="keyword">case</span> <span class="string">"/"</span>:
-            <span class="keyword">var</span> a = lower(obj.left), b = lower(obj.right);
+            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
             <span class="keyword">var</span> t = add(mul(b.re, b.re), mul(b.im, b.im));
             <span class="keyword">return</span> {
                 re: div(add(mul(a.re, b.re), mul(a.im, b.im)), t),
@@ -880,22 +880,22 @@ to a pair of expressions on floating-point numbers.</p>
         <span class="keyword">return</span> useCounts;
     }
 
-    <span class="function"><span class="keyword">function</span> <span class="title">irToJS</span><span class="params">(values, result)</span> {</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">ir_to_js</span><span class="params">(values, result)</span> {</span>
         <span class="keyword">var</span> useCounts = computeUseCounts(values);
         <span class="keyword">var</span> code = <span class="string">""</span>;
         <span class="keyword">var</span> next_temp_id = <span class="number">0</span>;
         <span class="keyword">var</span> js = [];
         <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
             <span class="keyword">var</span> node = values[i];
-            <span class="keyword">if</span> (node.type === <span class="string">"number"</span> || node.type === <span class="string">"arg"</span>)
+            <span class="keyword">if</span> (node.type === <span class="string">"number"</span> || node.type === <span class="string">"arg"</span>) {
                 js[i] = node.arg0;
-            <span class="keyword">else</span>
+            } <span class="keyword">else</span> {
                 js[i] = <span class="string">"("</span> + js[node.arg0] + node.type + js[node.arg1] + <span class="string">")"</span>;
-
-            <span class="keyword">if</span> (useCounts[i] &gt; <span class="number">1</span>) {
-                <span class="keyword">var</span> name = <span class="string">"t"</span> + next_temp_id++;
-                code += <span class="string">"var "</span> + name + <span class="string">" = "</span> + js[i] + <span class="string">";\n"</span>;
-                js[i] = name;
+                <span class="keyword">if</span> (useCounts[i] &gt; <span class="number">1</span>) {
+                    <span class="keyword">var</span> name = <span class="string">"t"</span> + next_temp_id++;
+                    code += <span class="string">"var "</span> + name + <span class="string">" = "</span> + js[i] + <span class="string">";\n"</span>;
+                    js[i] = name;
+                }
             }
         }
         code += <span class="string">"return {re: "</span> + js[result.re] + <span class="string">", im: "</span> + js[result.im] + <span class="string">"};\n"</span>;
@@ -903,8 +903,8 @@ to a pair of expressions on floating-point numbers.</p>
     }
 
     <span class="keyword">var</span> ast = parse(code);
-    <span class="keyword">var</span> result = lower(ast);
-    <span class="keyword">var</span> code = irToJS(values, result);
+    <span class="keyword">var</span> result = ast_to_ir(ast);
+    <span class="keyword">var</span> code = ir_to_js(values, result);
     console.log(code);
     <span class="keyword">return</span> Function(<span class="string">"z_re, z_im"</span>, code);
 
