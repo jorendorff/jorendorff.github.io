@@ -511,30 +511,16 @@ they are virtually identical, so code generation is very easy.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">compileToJSFunction</span><span class="params">(code)</span> {</span>
-    <span class="function"><span class="keyword">function</span> <span class="title">emit</span><span class="params">(obj)</span> {</span>
-        <span class="keyword">switch</span> (obj.type) {
+    <span class="function"><span class="keyword">function</span> <span class="title">emit</span><span class="params">(ast)</span> {</span>
+        <span class="keyword">switch</span> (ast.type) {
         <span class="keyword">case</span> <span class="string">"number"</span>:
-            <span class="keyword">return</span> obj.value;
-        <span class="keyword">case</span> <span class="string">"name"</span>:</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-21">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
-              <p>Only allow the name &quot;x&quot;.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (obj.id !== <span class="string">"x"</span>)
+            <span class="keyword">return</span> ast.value;
+        <span class="keyword">case</span> <span class="string">"name"</span>:
+            <span class="keyword">if</span> (ast.id !== <span class="string">"x"</span>)
                 <span class="keyword">throw</span> SyntaxError(<span class="string">"only the name 'x' is allowed"</span>);
-            <span class="keyword">return</span> obj.id;
+            <span class="keyword">return</span> ast.id;
         <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>: <span class="keyword">case</span> <span class="string">"*"</span>: <span class="keyword">case</span> <span class="string">"/"</span>:
-            <span class="keyword">return</span> <span class="string">"("</span> + emit(obj.left) + <span class="string">" "</span> + obj.type + <span class="string">" "</span> + emit(obj.right) + <span class="string">")"</span>;
+            <span class="keyword">return</span> <span class="string">"("</span> + emit(ast.left) + <span class="string">" "</span> + ast.type + <span class="string">" "</span> + emit(ast.right) + <span class="string">")"</span>;
         }
     }
 
@@ -549,11 +535,11 @@ assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</spa
         </li>
         
         
-        <li id="section-22">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap for-h3">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <h3>7. Complex function output</h3>
 
@@ -562,11 +548,11 @@ assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</spa
         </li>
         
         
-        <li id="section-23">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>This one returns a JS function that operates on complex numbers.</p>
 <p>This is a more advanced example of a compiler. It has a lowering phase
@@ -593,11 +579,11 @@ return {re: (((t0*t1)+t2)/t3), im: (((z_im*t1)-(t0*z_im))/t3)};
         </li>
         
         
-        <li id="section-24">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>The first thing here is a lot of code about &quot;values&quot;. This takes some
 explanation.</p>
@@ -606,40 +592,42 @@ explanation.</p>
 <li><p>It uses <code>parse</code> as its front end. We get an AST that represents
 operations on complex numbers.</p>
 </li>
-<li><p>Then, it <strong>lowers</strong> the AST to an <em>intermediate representation</em> (IR)
-that’s sort of halfway between the AST and JS code.</p>
+<li><p>Then, it <em>lowers</em> the AST to an <em>intermediate representation</em>, or
+<em>IR</em> that’s sort of halfway between the AST and JS code.</p>
 <p>The IR here is an array of <em>values</em>, basic arithmetic operations on
 plain old JS floating-point numbers. If we end up needing JS to
 compute `(z_re + 1) * (z_re - 1), then each subexpression there ends
 up being a value, represented by an object in the IR.</p>
 <p>Once we have the IR, we can throw away the AST. The IR represents the
 same formula, but in a different form. Lowering breaks down complex
-arithmetic into sequences of JS numeric operations.  JS won&#39;t know
-it&#39;s doing complex math.</p>
+arithmetic into sequences of JS numeric operations.  JS won’t know
+it’s doing complex math.</p>
 </li>
 <li><p>Lastly, we convert the IR to JS code.</p>
 </li>
 </ol>
-<p><strong>Why lowering?</strong> We don&#39;t have to do it this way; we could define a
-class <code>Complex</code>, with methods <code>.add()</code>, <code>.sub()</code>, etc., and generate JS
-code that uses that.  Lowering leads to faster JS code: we&#39;ll generate
-code here that does not allocate any objects for intermediate results.</p>
+<p><strong>Why IR?</strong> We don’t have to do it this way; we could define a class
+<code>Complex</code>, with methods <code>.add()</code>, <code>.sub()</code>, etc., and generate JS code
+that uses that.  Our back-end would be less than 20 lines.  But
+using IR helps us generate faster JS code. In particular, we’ll avoid
+allocating any objects for intermediate results and without any need
+for a <code>Complex</code> runtime library.</p>
 
             </div>
             
         </li>
         
         
-        <li id="section-25">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap for-h4">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <h4>About the IR</h4>
 <p>Before we implement lower(), we need to define objects representing
 values. (We could just use strings of JS code, but it turns
-out to be really complicated, and it&#39;s hard to apply even basic
+out to be really complicated, and it’s hard to apply even basic
 optimizations to strings.)</p>
 <p>We call these instructions &quot;values&quot;.  Each value represents a single JS
 expression that evaluates to a number.  A value is one of:</p>
@@ -670,11 +658,11 @@ is for &quot;common subexpression elimination&quot; (see valueToIndex).</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p><code>values(n1, n2)</code> returns true if the two arguments <code>n1</code> and <code>n2</code> are
 equal values—that is, if it would be redundant to compute them both,
@@ -691,11 +679,11 @@ a+1 is equal to 1+a.)</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Return the index of <code>v</code> within <code>values</code>, adding it to <code>values</code> if needed.</p>
 
@@ -706,11 +694,11 @@ a+1 is equal to 1+a.)</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Common subexpression elimination. If we have already computed this
 exact value, instead of computing it again, just reuse the already-
@@ -726,11 +714,11 @@ computed value.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>We have not already computed this value, so add the value to
 the list.</p>
@@ -804,50 +792,46 @@ the list.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
-              <p>Reduce obj, which represents an operation on complex numbers,
-to a pair of expressions on floating-point numbers.</p>
+              <p>Reduce obj, which represents an operation on complex numbers, to a pair
+of expressions on floating-point numbers.</p>
+<p>As a side effect, this populates the array <code>values</code> with IR objects.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">ast_to_ir</span><span class="params">(obj)</span> {</span>
         <span class="keyword">switch</span> (obj.type) {
         <span class="keyword">case</span> <span class="string">"number"</span>:
-            <span class="keyword">return</span> {re: num(obj.value), im: num(<span class="string">"0"</span>)};
+            <span class="keyword">return</span> {re: num(obj.value), im: num(<span class="string">"0"</span>)};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Complex arithmetic. Start by calling <code>ast_to_ir</code> recursively on the
+operands. The rest is just standard formulas:</p>
+<p>Re(<em>a</em> ± <em>b</em>) = Re(<em>a</em>) ± Re(<em>b</em>)<br>
+Im(<em>a</em> ± <em>b</em>) = Im(<em>a</em>) ± Im(<em>b</em>)</p>
 
-        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>:
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>:
             <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
             <span class="keyword">var</span> f = (obj.type === <span class="string">"+"</span> ? add : sub);
             <span class="keyword">return</span> {
                 re: f(a.re, b.re),
                 im: f(a.im, b.im)
-            };
-
-        <span class="keyword">case</span> <span class="string">"*"</span>:
-            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
-            <span class="keyword">return</span> {
-                re: sub(mul(a.re, b.re), mul(a.im, b.im)),
-                im: add(mul(a.re, b.im), mul(a.im, b.re))
-            };
-
-        <span class="keyword">case</span> <span class="string">"/"</span>:
-            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
-            <span class="keyword">var</span> t = add(mul(b.re, b.re), mul(b.im, b.im));
-            <span class="keyword">return</span> {
-                re: div(add(mul(a.re, b.re), mul(a.im, b.im)), t),
-                im: div(sub(mul(a.im, b.re), mul(a.re, b.im)), t)
-            };
-
-        <span class="keyword">case</span> <span class="string">"name"</span>:
-            <span class="keyword">if</span> (obj.id === <span class="string">"i"</span>)
-                <span class="keyword">return</span> {re: num(<span class="string">"0"</span>), im: num(<span class="string">"1"</span>)};
-            <span class="keyword">if</span> (obj.id !== <span class="string">"z"</span>)
-                <span class="keyword">throw</span> SyntaxError(<span class="string">"undefined variable: "</span> + obj.id);</pre></div></div>
+            };</pre></div></div>
             
         </li>
         
@@ -858,15 +842,85 @@ to a pair of expressions on floating-point numbers.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
-              <p>A little subtle here: values[0] is z_re; values[1] is z_im.</p>
+              <p>Multiplication:</p>
+<p>Re(<em>a</em> × <em>b</em>) = Re(<em>a</em>) × Re(<em>b</em>) − Im(<em>a</em>) × Im(<em>b</em>)<br>
+Im(<em>a</em> × <em>b</em>) = Re(<em>a</em>) × Im(<em>b</em>) + Im(<em>a</em>) × Re(<em>b</em>)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> {re: <span class="number">0</span>, im: <span class="number">1</span>};
-        }
-    }
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">case</span> <span class="string">"*"</span>:
+            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
+            <span class="keyword">return</span> {
+                re: sub(mul(a.re, b.re), mul(a.im, b.im)),
+                im: add(mul(a.re, b.im), mul(a.im, b.re))
+            };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Division:</p>
+<p>Re(<em>a</em> ÷ <em>b</em>) = (Re(<em>a</em>) × Re(<em>b</em>) + Im(<em>a</em>) × Im(<em>b</em>)) ÷ <em>t</em><br>
+Im(<em>a</em> ÷ <em>b</em>) = (Im(<em>a</em>) × Re(<em>b</em>) − Re(<em>a</em>) × Im(<em>b</em>)) ÷ <em>t</em><br>
+where <em>t</em> = Re(<em>b</em>)² + Im(<em>b</em>)²</p>
 
-    <span class="function"><span class="keyword">function</span> <span class="title">computeUseCounts</span><span class="params">(values)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">case</span> <span class="string">"/"</span>:
+            <span class="keyword">var</span> a = ast_to_ir(obj.left), b = ast_to_ir(obj.right);
+            <span class="keyword">var</span> t = add(mul(b.re, b.re), mul(b.im, b.im));
+            <span class="keyword">return</span> {
+                re: div(add(mul(a.re, b.re), mul(a.im, b.im)), t),
+                im: div(sub(mul(a.im, b.re), mul(a.re, b.im)), t)
+            };
+
+        <span class="keyword">case</span> <span class="string">"name"</span>:
+            <span class="keyword">if</span> (obj.id === <span class="string">"i"</span>)
+                <span class="keyword">return</span> {re: num(<span class="string">"0"</span>), im: num(<span class="string">"1"</span>)};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>A little subtle here: <code>values[0]</code> is the IR node for <code>z_re</code>;
+<code>values[1]</code> is <code>z_im</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (obj.id === <span class="string">"z"</span>)
+                <span class="keyword">return</span> {re: <span class="number">0</span>, im: <span class="number">1</span>};
+
+            <span class="keyword">throw</span> SyntaxError(<span class="string">"undefined variable: "</span> + obj.id);
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Figure out how many times each value is used in subsequent calculations.
+This is how we avoid emitting all the code for a value every time it is
+used. As we generate JS, whenever we reach a value that is used multiple
+times, we’ll write out a <code>var</code> statement.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">computeUseCounts</span><span class="params">(values)</span> {</span>
         <span class="keyword">var</span> binaryOps = {<span class="string">"+"</span>: <span class="number">1</span>, <span class="string">"-"</span>: <span class="number">1</span>, <span class="string">"*"</span>: <span class="number">1</span>, <span class="string">"/"</span>: <span class="number">1</span>};
         <span class="keyword">var</span> useCounts = [];
         <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
@@ -878,9 +932,22 @@ to a pair of expressions on floating-point numbers.</p>
             }
         }
         <span class="keyword">return</span> useCounts;
-    }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>Step 3: Convert the IR to JavaScript.</p>
 
-    <span class="function"><span class="keyword">function</span> <span class="title">ir_to_js</span><span class="params">(values, result)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">ir_to_js</span><span class="params">(values, result)</span> {</span>
         <span class="keyword">var</span> useCounts = computeUseCounts(values);
         <span class="keyword">var</span> code = <span class="string">""</span>;
         <span class="keyword">var</span> next_temp_id = <span class="number">0</span>;
@@ -909,7 +976,7 @@ to a pair of expressions on floating-point numbers.</p>
     <span class="keyword">return</span> Function(<span class="string">"z_re, z_im"</span>, code);
 
     <span class="comment">/*
-      I had planned to have this generate asm.js code for extra speed, but it's
+      I had planned to have this generate asm.js code for extra speed, but it’s
       so fast already that unless I can think of a more computationally
       intensive task, there is no need.
     */</span>
@@ -918,11 +985,11 @@ to a pair of expressions on floating-point numbers.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>The last bit of code here simply stores all seven back ends in one place
 where other code can get to them.</p>
