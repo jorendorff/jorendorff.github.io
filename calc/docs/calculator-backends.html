@@ -43,7 +43,7 @@
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
               <h1>calculator-backends.js</h1>
-<p>more things to do with a simple calculator parser</p>
+<p>things to do with a simple calculator parser</p>
 <p><a href="calculator-parser.html">calculator-parser.js</a> contains a simple parser.
 It contains enough code that you can actually do some basic math with it.
 But what else can you do with a parser?</p>
@@ -76,8 +76,8 @@ the calculator parser.</p>
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
               <h3>1. Show the JSON</h3>
-<p>Let’s make one that builds a tree describing the input formula. This is
-called an abstract syntax tree, or AST.</p>
+<p>Unmodified, the parser simply builds a tree describing the input
+formula. This is called an abstract syntax tree, or AST.</p>
 
             </div>
             
@@ -428,7 +428,7 @@ though you may have forgotten some of them.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>Now simply write an <code>out</code> object that computes the results using <code>Fraction</code>
+              <p>Now simply write an interpreter that computes the results using <code>Fraction</code>
 objects rather than JavaScript numbers. It’s almost too easy.</p>
 
             </div>
@@ -569,32 +569,26 @@ assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</spa
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>This one returns a JS function that operates on complex numbers.</p>
-<p>Here is a more advanced example of code generation.</p>
+<p>This is a more advanced example of a compiler. It has a lowering phase
+and a few simple optimizations.</p>
+<p>The input string <code>code</code> is a formula, for example, <code>&quot;(z+1)/(z-1)&quot;</code>,
+that uses a complex variable <code>z</code>.</p>
+<p>This returns a JS function that takes two arguments, <code>z_re</code> and <code>z_im</code>,
+the real and imaginary parts of a complex number <em>z</em>,
+and returns an object <code>{re: some number, im: some number}</code>,
+representing the complex result of computing the input formula,
+(<em>z</em>+1)/(<em>z</em>-1). Here is the actual output in that case:</p>
+<pre><code>(function anonymous(z_re, z_im) {
+var t0 = (z_re+1);
+var t1 = (z_re-1);
+var t2 = (z_im*z_im);
+var t3 = ((t1*t1)+t2);
+return {re: (((t0*t1)+t2)/t3), im: (((z_im*t1)-(t0*z_im))/t3)};
+})</code></pre>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">compileToComplexFunction</span><span class="params">(code)</span> {</span>
-    <span class="keyword">var</span> nextTmpId = <span class="number">0</span>;
-
-    <span class="function"><span class="keyword">function</span> <span class="title">genName</span><span class="params">()</span> {</span>
-        <span class="keyword">return</span> <span class="string">"tmp"</span> + nextTmpId++;
-    }
-
-    <span class="function"><span class="keyword">function</span> <span class="title">emit</span><span class="params">(obj)</span> {</span>
-        <span class="keyword">switch</span> (obj.type) {
-        <span class="keyword">case</span> <span class="string">"number"</span>:
-            <span class="keyword">return</span> { setup: <span class="string">""</span>, re: obj.value, im: <span class="string">"0"</span> };
-
-        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>:
-            <span class="keyword">var</span> a = emit(obj.left), b = emit(obj.right);
-            <span class="keyword">return</span> {
-                setup: a.setup + b.setup,
-                re: a.re + <span class="string">" "</span> + obj.type + <span class="string">" ("</span> + b.re + <span class="string">")"</span>,
-                im: a.im + <span class="string">" "</span> + obj.type + <span class="string">" ("</span> + b.im + <span class="string">")"</span>
-            };
-
-        <span class="keyword">case</span> <span class="string">"*"</span>:
-            <span class="keyword">var</span> a = emit(obj.left), b = emit(obj.right);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">compileToComplexFunction</span><span class="params">(code)</span> {</span></pre></div></div>
             
         </li>
         
@@ -605,19 +599,33 @@ assert.strictEqual(compileToJSFunction(<span class="string">"x*x - 2*x + 1"</spa
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
-              <p>This requires some setup.  First write some code to store the
-real and imaginary parts of a and b in temporary variables.
-We have to store them in temporary variables because the formula
-for complex multiplication uses each component twice, and we
-don’t want to compute them twice.</p>
+              <p>The first thing here is a lot of code about &quot;values&quot;. This takes some
+explanation.</p>
+<p><code>compileToComplexFunction</code> works in three steps.</p>
+<ol>
+<li><p>It uses <code>parse</code> as its front end. We get an AST that represents
+operations on complex numbers.</p>
+</li>
+<li><p>Then, it <strong>lowers</strong> the AST to an <em>intermediate representation</em> (IR)
+that’s sort of halfway between the AST and JS code.</p>
+<p>The IR here is an array of <em>values</em>, basic arithmetic operations on
+plain old JS floating-point numbers. If we end up needing JS to
+compute `(z_re + 1) * (z_re - 1), then each subexpression there ends
+up being a value, represented by an object in the IR.</p>
+<p>Once we have the IR, we can throw away the AST. The IR represents the
+same formula, but in a different form. Lowering breaks down complex
+arithmetic into sequences of JS numeric operations.  JS won&#39;t know
+it&#39;s doing complex math.</p>
+</li>
+<li><p>Lastly, we convert the IR to JS code.</p>
+</li>
+</ol>
+<p><strong>Why lowering?</strong> We don&#39;t have to do it this way; we could define a
+class <code>Complex</code>, with methods <code>.add()</code>, <code>.sub()</code>, etc., and generate JS
+code that uses that.  Lowering leads to faster JS code: we&#39;ll generate
+code here that does not allocate any objects for intermediate results.</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> atmp = genName(),
-                btmp = genName();
-            <span class="keyword">var</span> setup = a.setup + b.setup +
-                (<span class="string">"var A_re = "</span> + a.re + <span class="string">", A_im = "</span> + a.im + <span class="string">";\n"</span>).replace(<span class="regexp">/A/g</span>, atmp) +
-                (<span class="string">"var B_re = "</span> + b.re + <span class="string">", B_im = "</span> + b.im + <span class="string">";\n"</span>).replace(<span class="regexp">/B/g</span>, btmp);</pre></div></div>
             
         </li>
         
@@ -625,22 +633,39 @@ don’t want to compute them twice.</p>
         <li id="section-25">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h4">
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
-              <p>Now return the setup, along with expressions for computing the
-real and imaginary parts of (a * b).</p>
+              <h4>About the IR</h4>
+<p>Before we implement lower(), we need to define objects representing
+values. (We could just use strings of JS code, but it turns
+out to be really complicated, and it&#39;s hard to apply even basic
+optimizations to strings.)</p>
+<p>We call these instructions &quot;values&quot;.  Each value represents a single JS
+expression that evaluates to a number.  A value is one of:</p>
+<ol>
+<li><code>z_re</code> or <code>z_im</code>, the real or imaginary part of the argument z; or</li>
+<li>a numeric constant; or</li>
+<li>an arithmetic operation, one of <code>+ - * /</code>, on two previously-
+calculated values.</li>
+</ol>
+<p>And each value is represented by a plain old JSON object, as follows:</p>
+<ol>
+<li><code>{type: &quot;arg&quot;, arg0: &quot;z_re&quot;</code> or <code>&quot;z_im&quot;}</code></li>
+<li><code>{type: &quot;number&quot;, arg0: (string picture of number)}</code></li>
+<li><code>{type: (one of &quot;+&quot; &quot;-&quot; &quot;*&quot; &quot;/&quot;), arg0: (int), arg1: (int)}</code></li>
+</ol>
+<p>All values are stored sequentially in the array <code>values</code>.  The two ints
+<code>v.arg0</code> and <code>v.arg1</code> in an arithmetic value are indexes into <code>values</code>.</p>
+<p>The main reason to store all values in a flat array, rather than a tree,
+is for &quot;common subexpression elimination&quot; (see valueToIndex).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> {
-                setup: setup,
-                re: <span class="string">"A_re * B_re - A_im * B_im"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp),
-                im: <span class="string">"A_re * B_im + A_im * B_re"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp)
-            };
-
-        <span class="keyword">case</span> <span class="string">"/"</span>:
-            <span class="keyword">var</span> a = emit(obj.left), b = emit(obj.right);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> values = [
+        {type: <span class="string">"arg"</span>, arg0: <span class="string">"z_re"</span>, arg1: <span class="literal">null</span>},
+        {type: <span class="string">"arg"</span>, arg0: <span class="string">"z_im"</span>, arg1: <span class="literal">null</span>}
+    ];</pre></div></div>
             
         </li>
         
@@ -651,53 +676,17 @@ real and imaginary parts of (a * b).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
-              <p>Just as for multiplication, first write some code to store the real
-and imaginary parts of a and b in temporary variables.</p>
+              <p><code>values(n1, n2)</code> returns true if the two arguments <code>n1</code> and <code>n2</code> are
+equal values—that is, if it would be redundant to compute them both,
+because they are certain to have the same result.</p>
+<p>(This could be more sophisticated; it does not detect, for example, that
+a+1 is equal to 1+a.)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> atmp = genName(),
-                btmp = genName(),
-                tmp = genName();
-            <span class="keyword">var</span> setup = a.setup + b.setup +
-                (<span class="string">"var A_re = "</span> + a.re + <span class="string">", A_im = "</span> + a.im + <span class="string">";\n"</span>).replace(<span class="regexp">/A/g</span>, atmp) +
-                (<span class="string">"var B_re = "</span> + b.re + <span class="string">", B_im = "</span> + b.im + <span class="string">";\n"</span>).replace(<span class="regexp">/B/g</span>, btmp) +
-                (<span class="string">"var T = B_re * B_re + B_im * B_im;\n"</span>).replace(<span class="regexp">/T/g</span>, tmp).replace(<span class="regexp">/B/g</span>, btmp);
-            <span class="keyword">return</span> {
-                setup: setup,
-                re: <span class="string">"(A_re * B_re + A_im * B_im) / T"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp).replace(<span class="regexp">/T/g</span>, tmp),
-                im: <span class="string">"(A_im * B_re - A_re * B_im) / T"</span>.replace(<span class="regexp">/A/g</span>, atmp).replace(<span class="regexp">/B/g</span>, btmp).replace(<span class="regexp">/T/g</span>, tmp)
-            };
-
-        <span class="keyword">case</span> <span class="string">"name"</span>:
-            <span class="keyword">if</span> (obj.id === <span class="string">"i"</span>)
-                <span class="keyword">return</span> {setup: <span class="string">""</span>, re: <span class="string">"0"</span>, im: <span class="string">"1"</span>};
-            <span class="keyword">if</span> (obj.id !== <span class="string">"z"</span>)
-                <span class="keyword">throw</span> SyntaxError(<span class="string">"undefined variable: "</span> + obj.id);
-            <span class="keyword">return</span> {
-                setup: <span class="string">""</span>,
-                re: obj.id + <span class="string">"_re"</span>,
-                im: obj.id + <span class="string">"_im"</span>
-            };
-        }
-    }
-
-    <span class="keyword">var</span> result = emit(parse(code));
-    <span class="keyword">var</span> code =
-        result.setup +
-        <span class="string">"return {re: "</span> + result.re + <span class="string">", im: "</span> + result.im + <span class="string">"};\n"</span>;
-    <span class="keyword">return</span> Function(<span class="string">"z_re, z_im"</span>, code);
-
-    <span class="comment">/*
-      I had planned to have this generate asm.js code for extra speed, but it's
-      so fast already that unless I can think of a more computationally
-      intensive task, there is no need.
-         result.setup +
-         "var " + tmp + " = " + result.re + ";\n" +
-         "z_im = " + result.im + ";\n" +
-         "z_re = " + tmp + ";\n" +
-    */</span>
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">valuesEqual</span><span class="params">(n1, n2)</span> {</span>
+        <span class="keyword">return</span> n1.type === n2.type &amp;&amp; n1.arg0 === n2.arg0 &amp;&amp; n1.arg1 === n2.arg1;
+    }</pre></div></div>
             
         </li>
         
@@ -707,6 +696,233 @@ and imaginary parts of a and b in temporary variables.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Return the index of <code>v</code> within <code>values</code>, adding it to <code>values</code> if needed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">valueToIndex</span><span class="params">(v)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Common subexpression elimination. If we have already computed this
+exact value, instead of computing it again, just reuse the already-
+computed value.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
+            <span class="keyword">if</span> (valuesEqual(values[i], v))
+                <span class="keyword">return</span> i;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>We have not already computed this value, so add the value to
+the list.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        values.push(v);
+        <span class="keyword">return</span> values.length - <span class="number">1</span>;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">num</span><span class="params">(s)</span> {</span>
+        <span class="keyword">return</span> valueToIndex({type: <span class="string">"number"</span>, arg0: s, arg1: <span class="literal">null</span>});
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">op</span><span class="params">(op, a, b)</span> {</span>
+        <span class="keyword">return</span> valueToIndex({type: op, arg0: a, arg1: b });
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">isNumber</span><span class="params">(i)</span> {</span>
+        <span class="keyword">return</span> values[i].type === <span class="string">"number"</span>;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">isZero</span><span class="params">(i)</span> {</span>
+        <span class="keyword">return</span> isNumber(i) &amp;&amp; values[i].arg0 === <span class="string">"0"</span>;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">isOne</span><span class="params">(i)</span> {</span>
+        <span class="keyword">return</span> isNumber(i) &amp;&amp; values[i].arg0 === <span class="string">"1"</span>;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">add</span><span class="params">(a, b)</span> {</span>
+        <span class="keyword">if</span> (isZero(a))  <span class="comment">// simplify (0+b) to b</span>
+            <span class="keyword">return</span> b;
+        <span class="keyword">if</span> (isZero(b))  <span class="comment">// simplify (a+0) to a</span>
+            <span class="keyword">return</span> a;
+        <span class="keyword">if</span> (isNumber(a) &amp;&amp; isNumber(b))  <span class="comment">// constant-fold (1+2) to 3</span>
+            <span class="keyword">return</span> num(String(Number(values[a].arg0) + Number(values[b].arg0)));
+        <span class="keyword">return</span> op(<span class="string">"+"</span>, a, b);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">sub</span><span class="params">(a, b)</span> {</span>
+        <span class="keyword">if</span> (isZero(b))  <span class="comment">// simplify (a-0) to a</span>
+            <span class="keyword">return</span> a;
+        <span class="keyword">if</span> (isNumber(a) &amp;&amp; isNumber(b))  <span class="comment">// constant-fold (3-2) to 1</span>
+            <span class="keyword">return</span> num(String(Number(values[a].arg0) - Number(values[b].arg0)));
+        <span class="keyword">return</span> op(<span class="string">"-"</span>, a, b);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">mul</span><span class="params">(a, b)</span> {</span>
+        <span class="keyword">if</span> (isZero(a))  <span class="comment">// simplify 0*b to 0</span>
+            <span class="keyword">return</span> a;
+        <span class="keyword">if</span> (isZero(b))  <span class="comment">// simplify a*0 to 0</span>
+            <span class="keyword">return</span> b;
+        <span class="keyword">if</span> (isOne(a))  <span class="comment">// simplify 1*b to b</span>
+            <span class="keyword">return</span> b;
+        <span class="keyword">if</span> (isOne(b))  <span class="comment">// simplify a*1 to a</span>
+            <span class="keyword">return</span> a;
+        <span class="keyword">if</span> (isNumber(a) &amp;&amp; isNumber(b))  <span class="comment">// constant-fold (2*2) to 4</span>
+            <span class="keyword">return</span> num(String(Number(values[a].arg0) * Number(values[b].arg0)));
+        <span class="keyword">return</span> op(<span class="string">"*"</span>, a, b);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">div</span><span class="params">(a, b)</span> {</span>
+        <span class="keyword">if</span> (isOne(b))  <span class="comment">// simplify a/1 to a</span>
+            <span class="keyword">return</span> a;
+        <span class="keyword">if</span> (isNumber(a) &amp;&amp; isNumber(b) &amp;&amp; !isZero(b))  <span class="comment">// constant-fold 4/2 to 2</span>
+            <span class="keyword">return</span> num(String(Number(values[a].arg0) / Number(values[b].arg0)));
+        <span class="keyword">return</span> op(<span class="string">"/"</span>, a, b);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Reduce obj, which represents an operation on complex numbers,
+to a pair of expressions on floating-point numbers.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">lower</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">switch</span> (obj.type) {
+        <span class="keyword">case</span> <span class="string">"number"</span>:
+            <span class="keyword">return</span> {re: num(obj.value), im: num(<span class="string">"0"</span>)};
+
+        <span class="keyword">case</span> <span class="string">"+"</span>: <span class="keyword">case</span> <span class="string">"-"</span>:
+            <span class="keyword">var</span> a = lower(obj.left), b = lower(obj.right);
+            <span class="keyword">var</span> f = (obj.type === <span class="string">"+"</span> ? add : sub);
+            <span class="keyword">return</span> {
+                re: f(a.re, b.re),
+                im: f(a.im, b.im)
+            };
+
+        <span class="keyword">case</span> <span class="string">"*"</span>:
+            <span class="keyword">var</span> a = lower(obj.left), b = lower(obj.right);
+            <span class="keyword">return</span> {
+                re: sub(mul(a.re, b.re), mul(a.im, b.im)),
+                im: add(mul(a.re, b.im), mul(a.im, b.re))
+            };
+
+        <span class="keyword">case</span> <span class="string">"/"</span>:
+            <span class="keyword">var</span> a = lower(obj.left), b = lower(obj.right);
+            <span class="keyword">var</span> t = add(mul(b.re, b.re), mul(b.im, b.im));
+            <span class="keyword">return</span> {
+                re: div(add(mul(a.re, b.re), mul(a.im, b.im)), t),
+                im: div(sub(mul(a.im, b.re), mul(a.re, b.im)), t)
+            };
+
+        <span class="keyword">case</span> <span class="string">"name"</span>:
+            <span class="keyword">if</span> (obj.id === <span class="string">"i"</span>)
+                <span class="keyword">return</span> {re: num(<span class="string">"0"</span>), im: num(<span class="string">"1"</span>)};
+            <span class="keyword">if</span> (obj.id !== <span class="string">"z"</span>)
+                <span class="keyword">throw</span> SyntaxError(<span class="string">"undefined variable: "</span> + obj.id);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>A little subtle here: values[0] is z_re; values[1] is z_im.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> {re: <span class="number">0</span>, im: <span class="number">1</span>};
+        }
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">computeUseCounts</span><span class="params">(values)</span> {</span>
+        <span class="keyword">var</span> binaryOps = {<span class="string">"+"</span>: <span class="number">1</span>, <span class="string">"-"</span>: <span class="number">1</span>, <span class="string">"*"</span>: <span class="number">1</span>, <span class="string">"/"</span>: <span class="number">1</span>};
+        <span class="keyword">var</span> useCounts = [];
+        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
+            useCounts[i] = <span class="number">0</span>;
+            <span class="keyword">var</span> node = values[i];
+            <span class="keyword">if</span> (node.type <span class="keyword">in</span> binaryOps) {
+                useCounts[node.arg0]++;
+                useCounts[node.arg1]++;
+            }
+        }
+        <span class="keyword">return</span> useCounts;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">irToJS</span><span class="params">(values, result)</span> {</span>
+        <span class="keyword">var</span> useCounts = computeUseCounts(values);
+        <span class="keyword">var</span> code = <span class="string">""</span>;
+        <span class="keyword">var</span> next_temp_id = <span class="number">0</span>;
+        <span class="keyword">var</span> js = [];
+        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
+            <span class="keyword">var</span> node = values[i];
+            <span class="keyword">if</span> (node.type === <span class="string">"number"</span> || node.type === <span class="string">"arg"</span>)
+                js[i] = node.arg0;
+            <span class="keyword">else</span>
+                js[i] = <span class="string">"("</span> + js[node.arg0] + node.type + js[node.arg1] + <span class="string">")"</span>;
+
+            <span class="keyword">if</span> (useCounts[i] &gt; <span class="number">1</span>) {
+                <span class="keyword">var</span> name = <span class="string">"t"</span> + next_temp_id++;
+                code += <span class="string">"var "</span> + name + <span class="string">" = "</span> + js[i] + <span class="string">";\n"</span>;
+                js[i] = name;
+            }
+        }
+        code += <span class="string">"return {re: "</span> + js[result.re] + <span class="string">", im: "</span> + js[result.im] + <span class="string">"};\n"</span>;
+        <span class="keyword">return</span> code;
+    }
+
+    <span class="keyword">var</span> ast = parse(code);
+    <span class="keyword">var</span> result = lower(ast);
+    <span class="keyword">var</span> code = irToJS(values, result);
+    console.log(code);
+    <span class="keyword">return</span> Function(<span class="string">"z_re, z_im"</span>, code);
+
+    <span class="comment">/*
+      I had planned to have this generate asm.js code for extra speed, but it's
+      so fast already that unless I can think of a more computationally
+      intensive task, there is no need.
+    */</span>
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>The last bit of code here simply stores all seven back ends in one place
 where other code can get to them.</p>
