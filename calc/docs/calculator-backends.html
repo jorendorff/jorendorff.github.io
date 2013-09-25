@@ -593,10 +593,10 @@ explanation.</p>
 operations on complex numbers.</p>
 </li>
 <li><p>Then, it <em>lowers</em> the AST to an <em>intermediate representation</em>, or
-<em>IR</em> that’s sort of halfway between the AST and JS code.</p>
+<em>IR</em>, that’s sort of halfway between the AST and JS code.</p>
 <p>The IR here is an array of <em>values</em>, basic arithmetic operations on
 plain old JS floating-point numbers. If we end up needing JS to
-compute `(z_re + 1) * (z_re - 1), then each subexpression there ends
+compute <code>(z_re + 1) * (z_re - 1)</code>, then each subexpression there ends
 up being a value, represented by an object in the IR.</p>
 <p>Once we have the IR, we can throw away the AST. The IR represents the
 same formula, but in a different form. Lowering breaks down complex
@@ -625,8 +625,8 @@ for a <code>Complex</code> runtime library.</p>
                 <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <h4>About the IR</h4>
-<p>Before we implement lower(), we need to define objects representing
-values. (We could just use strings of JS code, but it turns
+<p>Before we implement <code>ast_to_ir()</code>, we need to define objects
+representing values. (We could just use strings of JS code, but it turns
 out to be really complicated, and it’s hard to apply even basic
 optimizations to strings.)</p>
 <p>We call these instructions &quot;values&quot;.  Each value represents a single JS
@@ -664,11 +664,11 @@ is for &quot;common subexpression elimination&quot; (see valueToIndex).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
-              <p><code>values(n1, n2)</code> returns true if the two arguments <code>n1</code> and <code>n2</code> are
-equal values—that is, if it would be redundant to compute them both,
-because they are certain to have the same result.</p>
+              <p><strong>valuesEqual(<em>n1</em>, <em>n2</em>)</strong> returns true if the two arguments <em>n1</em> and
+<em>n2</em> are equal IR nodes—that is, if it would be redundant to compute them
+both, because they are certain to have the same result.</p>
 <p>(This could be more sophisticated; it does not detect, for example, that
-a+1 is equal to 1+a.)</p>
+<code>a+1</code> is equal to <code>1+a</code>.)</p>
 
             </div>
             
@@ -685,7 +685,8 @@ a+1 is equal to 1+a.)</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
-              <p>Return the index of <code>v</code> within <code>values</code>, adding it to <code>values</code> if needed.</p>
+              <p><strong>valueToIndex(<em>v</em>)</strong> ensures that <em>v</em> is in <em>values</em>. Returns the index
+<em>*of </em>v* within the array.</p>
 
             </div>
             
@@ -735,9 +736,22 @@ the list.</p>
 
     <span class="function"><span class="keyword">function</span> <span class="title">op</span><span class="params">(op, a, b)</span> {</span>
         <span class="keyword">return</span> valueToIndex({type: op, arg0: a, arg1: b });
-    }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>A few predicates used to implement some simple optimizations below.</p>
 
-    <span class="function"><span class="keyword">function</span> <span class="title">isNumber</span><span class="params">(i)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">isNumber</span><span class="params">(i)</span> {</span>
         <span class="keyword">return</span> values[i].type === <span class="string">"number"</span>;
     }
 
@@ -747,9 +761,24 @@ the list.</p>
 
     <span class="function"><span class="keyword">function</span> <span class="title">isOne</span><span class="params">(i)</span> {</span>
         <span class="keyword">return</span> isNumber(i) &amp;&amp; values[i].arg0 === <span class="string">"1"</span>;
-    }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Each of these four functions ensures that an IR node for a certain
+computation has been added to <code>values</code>, and returns the index of that
+node.</p>
 
-    <span class="function"><span class="keyword">function</span> <span class="title">add</span><span class="params">(a, b)</span> {</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">add</span><span class="params">(a, b)</span> {</span>
         <span class="keyword">if</span> (isZero(a))  <span class="comment">// simplify (0+b) to b</span>
             <span class="keyword">return</span> b;
         <span class="keyword">if</span> (isZero(b))  <span class="comment">// simplify (a+0) to a</span>
@@ -792,15 +821,18 @@ the list.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
-              <p>Reduce obj, which represents an operation on complex numbers, to a pair
-of expressions on floating-point numbers.</p>
-<p>As a side effect, this populates the array <code>values</code> with IR objects.</p>
+              <p><strong>ast_to_ir(<em>obj</em>)</strong> reduces <em>obj</em>, which represents an operation on
+complex numbers, to a sequence of operations on floating-point numbers.</p>
+<p>It adds IR nodes representing those operations to <em>values</em>.</p>
+<p>Returns an object <code>{im: int, re: int}</code> giving the index, in <em>values</em>, of
+the IR nodes representing the real part and the imaginary part of the
+answer.</p>
 
             </div>
             
@@ -812,11 +844,11 @@ of expressions on floating-point numbers.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Complex arithmetic. Start by calling <code>ast_to_ir</code> recursively on the
 operands. The rest is just standard formulas:</p>
@@ -836,11 +868,11 @@ Im(<em>a</em> ± <em>b</em>) = Im(<em>a</em>) ± Im(<em>b</em>)</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Multiplication:</p>
 <p>Re(<em>a</em> × <em>b</em>) = Re(<em>a</em>) × Re(<em>b</em>) − Im(<em>a</em>) × Im(<em>b</em>)<br>
@@ -858,11 +890,11 @@ Im(<em>a</em> × <em>b</em>) = Re(<em>a</em>) × Im(<em>b</em>) + Im(<em>a</em>)
         </li>
         
         
-        <li id="section-32">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Division:</p>
 <p>Re(<em>a</em> ÷ <em>b</em>) = (Re(<em>a</em>) × Re(<em>b</em>) + Im(<em>a</em>) × Im(<em>b</em>)) ÷ <em>t</em><br>
@@ -886,11 +918,11 @@ where <em>t</em> = Re(<em>b</em>)² + Im(<em>b</em>)²</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>A little subtle here: <code>values[0]</code> is the IR node for <code>z_re</code>;
 <code>values[1]</code> is <code>z_im</code>.</p>
@@ -907,11 +939,11 @@ where <em>t</em> = Re(<em>b</em>)² + Im(<em>b</em>)²</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Figure out how many times each value is used in subsequent calculations.
 This is how we avoid emitting all the code for a value every time it is
@@ -937,11 +969,11 @@ times, we’ll write out a <code>var</code> statement.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Step 3: Convert the IR to JavaScript.</p>
 
@@ -985,11 +1017,11 @@ times, we’ll write out a <code>var</code> statement.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>The last bit of code here simply stores all seven back ends in one place
 where other code can get to them.</p>
