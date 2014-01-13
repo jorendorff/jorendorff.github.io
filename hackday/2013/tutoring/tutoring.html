@@ -1,0 +1,534 @@
+<!doctype html>
+<html>
+<head>
+  <title>What&rsquo;s known about tutoring</title>
+  <link href="https://fonts.googleapis.com/css?family=Sorts+Mill+Goudy:400,400italic" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+        font-family: Sorts Mill Goudy, serif;
+        color: #666; background-color: #fdfbfb;
+        margin: 0;
+    }
+    body, th, td { font-size: 15pt; }
+
+    div.body, div.head {
+        margin-left: auto; margin-right: auto; max-width: 46em;
+    }
+    div.inbody, div.inhead {
+        margin-left: 1em;
+        margin-right: 1em;
+    }
+    div.outhead {
+        background-image: url('fishinglesson1.jpg');
+        background-position: center center;
+        background-size: cover;
+    }
+    hgroup {
+        margin-left: -16em;
+        padding-left: 16em;
+        padding-top: 6em;
+    }
+    hgroup h1, hgroup h2 {
+        color: #fdfbfb;
+        opacity: 1.0;
+        text-shadow: rgba(0, 0, 0, 0.3) 1.5px 1px;
+    }
+    hgroup h1 { font-size: 210%; ;}
+    hgroup h2 { font-size: 170%; }
+
+    section > h2 {
+        margin: 0 -0.6em;
+        padding-left: 0.6em;
+        padding-top: 6em; 
+        background-size: cover;
+        background-position: center center;
+        color: black;
+        text-shadow: rgba(253, 253, 251, 0.4) 1.5px 1px, rgb(253, 253, 251) 0 0 18px;
+    }
+
+    #sec-problem   > h2 { background-image: url('concentration.jpg'); }
+    #sec-plan      > h2 { background-image: url('puzzling.jpg'); }
+    #sec-findings  > h2 { background-image: url('writing.jpg'); }
+    #sec-deeper    > h2 { background-image: url('garden.jpg'); }
+    #sec-so-what   > h2 { background-image: url('suspicion.jpg'); }
+    #sec-volunteer > h2 { background-image: url('moody.jpg'); }
+
+    #sec-problem > h2, #sec-findings > h2, #sec-volunteer > h2 {
+        color: #fdfdfb;
+        text-shadow: rgba(0, 0, 0, 0.4) 1.5px 1px, rgb(0, 0, 0) 0 0 18px;
+    }
+
+
+    h1, h2, h3, h4, h5, h6 { font-style: italic; font-weight: normal; }
+    p { line-height: 1.4em; }
+    pre { border-radius: 1em; padding: 1em 2.5em; background-color: #101810; color: white; }
+    pre, kbd {
+        font-family: VT323, "Courier New", Courier, monospace;
+        font-size: 19pt;
+    }
+    a:link { color: #446077; }
+    a:visited { color: #3c5066; }
+
+    section { margin-top: 3.5em; }
+    hr { opacity: 0.6; margin-top: 2.5em; }
+    div.footer { font-style: italic; }
+
+    p.btw { font-style: italic; }
+
+    iframe { display: block; margin: 0 auto; max-width: 100%; }
+  </style>
+</head>
+<body>
+
+<div class="outhead">
+  <div class="head">
+    <div class="inhead">
+      <hgroup>
+        <h1>What&rsquo;s known about tutoring</h1>
+        <h2>Jason Orendorff, Nashville Code Co-op talk day, 30&nbsp;March 2013</h2>
+      </hgroup>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+<div class="inbody">
+
+<section>
+  <p>Imagine a program to teach basic math to grade-school kids.</p>
+
+  <p>It&rsquo;s a research project. Cutting edge stuff&hellip; in the year 1985.</p>
+
+  <p>It presents a math problem.</p>
+
+  <pre>
+        87
+      x 43
+      ----
+  </pre>
+
+  <p>You put in the answer.
+  The program checks your work.
+  And here&rsquo;s the clever part.
+  If you miss it, the program analyzes your answer
+  and helpfully tells you where you screwed up.
+  Like if I type, <kbd>32</kbd>, Enter:
+
+  <pre>
+  Your answer is wrong.
+
+  Possible causes of error:
+
+  1. You multiplied the number in the multiplicand
+  by the number directly beneath it in the multiplier,
+  and you wrote down the carried number,
+  ignoring the units number.
+  </pre>
+
+  <p>See, there&rsquo;s your problem right there.
+  Your answer is wrong.
+  It&rsquo;s the, you know, multiplicand&hellip;</p>
+
+  <p>Well.
+  I imagine you&rsquo;re thinking,
+  <em>This is an <strong>awful</strong> error message.
+  Computers can&rsquo;t talk to human beings like that.
+  You need to tweak the wording,
+  fix the tone,
+  tighten up the explanation&hellip;</em></p>
+
+  <p>But that&rsquo;s because you and I, we&rsquo;re software people.
+  We have lots of experience, too much experience, with error messages.
+  It turns out the error message
+  is not the key thing that&rsquo;s wrong here.</p>
+
+  <p>This story starts with a program.
+  But it&rsquo;s not about software or software people at all.</p>
+</section>
+
+
+<section id="sec-problem">
+  <h2>The problem</h2>
+
+  <p>The error message quoted above is real.
+  This story is about a real person
+  and what happened when he read that error message.</p>
+
+  <p>His name is Mark Lepper.
+  And he&rsquo;s not a software person.
+  He&rsquo;s a social psychologist. An academic.
+  In the late 1980s and early &rsquo;90s,
+  computer-based education was a big topic due to the PC,
+  much as it is today due to rich Web apps.
+  Lepper was interested.
+  He saw a lot of these programs,
+  and like us, he found them lacking.
+  But he saw a different reason, a different underlying problem.</p>
+
+  <p>Lepper thought: <i>the root problem here is that these programmers 
+  just don&rsquo;t have the slightest idea what they&rsquo;re doing.
+  They clearly don&rsquo;t understand the psychology
+  of one-on-one teaching situations.
+  Particularly how a kid&rsquo;s motivation can be undermined.
+  I should have pity on them, send them a few papers on this.</i></p>
+
+  <p>So he did a literature search.
+  And came up empty.</p>
+
+  <p>A lot of research had been done on classroom teaching.
+  But of one-on-one teaching&mdash;tutoring&mdash;almost nothing was known.</p>
+</section>
+
+
+<section id="sec-plan">
+  <h2>The plan</h2>
+
+  <p>Naturally, Lepper went to work building a team of researchers,
+  and they ran studies and wrote papers on tutoring for the next decade.</p>
+
+  <p>All the research had the same basic plan.
+  First, they would pick a topic in basic math.
+  Say, fractions.
+  They&rsquo;d find kids in need of remedial tutoring in that topic
+  and tutors with experience teaching it.
+  They&rsquo;d pre-test the kids for both math skills and motivation.
+  The tutoring sessions would be videotaped.
+  And they&rsquo;d test the kids again afterwards.
+  Sometimes they&rsquo;d have the tutors watch the tape
+  and provide a running commentary.</p>
+
+  <p>Note how this is set up.
+  Because they measured the student&rsquo;s skills and motivation before and after,
+  they could objectively distinguish effective sessions from ineffective ones.
+  Did the scores go up? or stay flat?</p>
+
+  <p>Then, they could watch the video
+  and identify the strategies or techniques used in the good sessions.</p>
+</section>
+
+<section id="sec-findings">
+  <h2>The findings</h2>
+
+  <p>So what did they find? Two things.</p>
+
+  <p>One, there is such a thing as a highly effective tutor.
+  The best tutors were amazing.</p>
+
+  <blockquote>
+    <p>At their best, they were able to turn initially resistant,
+    alienated, and seemingly helpless students
+    into interested and excited participants in the learning process.
+    At their best, they were able to help remedial students
+    to progress through what would normally have been
+    weeks or months of curriculum material
+    in a very short time.
+    Moreover, gains in students' learning remained apparent
+    following and outside of the tutoring situation, showing that these gains
+    were not simply the result of [&hellip;]
+    scaffolding that tutors provided [directly].</p>
+  </blockquote>
+
+  <p>Two. The best tutors had a surprisingly consistent approach to tutoring.
+  In fact, Lepper and Woolverton list about twenty
+  specific qualities and techniques of good tutors.
+  We&rsquo;ll just touch on a few of them here.</p>
+
+  <ul>
+    <li>
+      <p><strong>Math knowledge.</strong></p>
+
+      <p>The best tutors knew the subject matter surprisingly well,
+      even for math tutors.
+      They knew why things work the way they work.
+      They knew details of math history.
+      They had a deep pool of real-world analogies and examples to draw from.
+      They knew what the likely misunderstandings were in advance.</p>
+    </li>
+
+    <li>
+      <p><strong>Questions, not directions.</strong></p>
+
+      <p>Good tutors ask questions.
+      They don&rsquo;t tell the student what to do.</p>
+
+      <p>The researchers counted what percentage
+      of the remarks their best tutors made were questions,
+      as opposed to statements or instructions.
+      Eighty to ninety percent.</p>
+
+      <p>This number is insane! Ninety percent questions!
+      You can&rsquo;t talk like that. Nobody talks like that.
+      Except the very best tutors.</p>
+    </li>
+
+    <li>
+      <p><strong>Hints, not answers.</strong></p>
+
+      <p>The best tutors never give away an answer.
+      Instead, they give a hint, the tiniest hint they can think of,
+      let you think it over,
+      and if you&rsquo;re still stuck,
+      they&rsquo;ll give you another hint.
+      And they&rsquo;re very patient.
+      They want you to take the next step on your own.
+      Good tutors may offer five or six hints in a row.</p>
+
+      <p>The researchers wrote: &ldquo;if we did not have clear outcome data
+      establishing the great success of these same tutors, it would be easy to
+      believe that such [a] strategy [was] dysfunctional.&rdquo;</p>
+    </li>
+
+    <li>
+      <p><strong>Productive vs. nonproductive errors</strong></p>
+
+      <p>My favorite.</p>
+
+      <p>Good tutors would just ignore trivial errors.
+      Quote: &ldquo;Our less successful tutors, however,
+      seemed unable to let any error pass,
+      no matter how trivial or inconsequential.&rdquo;</p>
+
+      <p>Furthermore:
+      good tutors distinguished between errors
+      that would lead to a wild goose chase
+      and errors that would lead to a teaching moment.
+      &ldquo;[T]o these tutors,
+      some student errors seemed &lsquo;productive&rsquo; [&hellip;]
+      [They] would provide good occasions for students [&hellip;]
+      to discover their own mistakes[.]
+      Such errors were therefore deliberately allowed by the tutors,
+      so that they could then be systematically &lsquo;debugged&rsquo;.&rdquo;
+      Some tutors even <em>intentionally chose problems</em>
+      that would reveal particular errors
+      in the student&rsquo;s understanding.</p>
+
+      <p>So. Devious.
+      Like white-hat hackers,
+      expert tutors are taking valuable supervillain skills
+      and using them for good.</p>
+    </li>
+  </ul>
+
+  <p>OK. There are some other things too,
+  but first let&rsquo;s review. We have</p>
+
+  <ul>
+    <li>an expert teacher who knows the material thoroughly,</li>
+    <li>asking lots of questions</li>
+    <li>and giving hints, instead of presenting answers from authority, and</li>
+    <li>leading the student into and out of the classic errors.</li>
+  </ul>
+
+  <p>Does this sound familiar? Does it have a name?</p>
+
+  <p>This is the Socratic method.
+  Popularized by Plato around 380&nbsp;BCE.
+  This educational technology is over two thousand years old.</p>
+
+  <p>It&rsquo;s the state of the art.</p>
+
+  <p>Computers can&rsquo;t do this yet!
+  I think we&rsquo;re fairly close to being able to do a little of it in a very shallow way.
+  Doing this well requires a model of the student&rsquo;s understanding of the material.
+  You have to understand their misunderstandings
+  and systematically debug them.</p>
+
+  <p>I like this picture of how we really learn.</p>
+
+  <p>But this isn&rsquo;t the whole picture.
+  There&rsquo;s a much more important lesson to learn here.</p>
+</section>
+
+
+<section id="sec-deeper">
+  <h2>The deeper lesson</h2>
+
+  <p>What else do good tutors do?</p>
+
+  <ul>
+    <li>
+      <p>They take a few minutes in each lesson
+      to chat with the student.
+      Not about math. Small talk.</p>
+    </li>
+
+    <li>
+      <p>They exhibit warmth and concern,
+      and confidence that the student can succeed.</p>
+    </li>
+
+    <li>
+      <p>They present challenging problems,
+      always problems that are just at the edge
+      of what they think the student can do.</p>
+    </li>
+
+    <li>
+      <p>They are extremely careful with negative feedback.
+      Some tutors <em>never</em> explicitly told a student that they got something wrong!
+      Instead, they&rsquo;d ask a question.
+      &ldquo;Did you remember to carry the one?&rdquo;
+      They&rsquo;re also careful not to overdo it with positive feedback.</p>
+    </li>
+  </ul>
+
+  <p>Now these traits are interesting because none of these are teaching techniques at all.
+  They point at something else about learning.</p>
+
+  <p>Tutoring, apparently, is about motivation.</p>
+
+  <p>It turns out your mind has to be in a very specific state
+  in order for you to learn.</p>
+
+  <p>Good tutors not only track the student&rsquo;s understanding.
+  They also track the student&rsquo;s motivation.
+  They know if a kid is bored, discouraged, frustrated, tired, distracted.
+  And they act on that knowledge.
+  Because if your mind is not engaged, you&rsquo;re not learning.</p>
+
+  <p>Even the Socratic techniques are all about motivation!
+  Let&rsquo;s go back to them.</p>
+
+  <p>Why do good tutors allow students to make errors, even lead them into errors?
+  Because once you gain a little confidence,
+  detecting a bug in your own understanding is super motivating.
+  You&rsquo;re engaged. You want to fix it.</p>
+
+  <p>Why do good tutors give hints and not answers?
+  Well, partly because struggling with a problem is how you learn.
+  But just as importantly, giving the student the answer
+  ends the exercise in failure.
+  It tells the student, <i>I give up on you.</i>
+  Whereas slowly guiding the student all the way through
+  ends with them earning a win.</p>
+
+  <p>Why do good tutors ask questions?
+  In a one-on-one situation, a question does something almost magical.
+  It compels a response. It turns on the brain.
+  A question makes us care.</p>
+</section>
+
+
+<section id="sec-so-what">
+  <h2>So what?</h2>
+
+  <p>And that&rsquo;s what I know about tutoring.
+  All of this comes from one chapter of one book:
+  &ldquo;The Wisdom of Practice:
+  Lessons Learned from the Study of Highly Effective Tutors&rdquo;
+  by Mark Lepper and Maria Woolverton, in
+  <a href="https://www.amazon.com/dp/012064455X"><i>Improving Academic Achievement</i></a>.
+  It is packed with amazing discoveries,
+  much more than I could write about here.</p>
+
+  <p>But&hellip; so what? Why should we, as programmers,
+  care about all this?</p>
+
+  <iframe width="640" height="360" src="http://www.youtube.com/embed/3buhHvy3t5U"
+   frameborder="0" allowfullscreen></iframe>
+
+  <p>This is a recording of a popular Web site that helps kids learn math.
+  Millions of kids use this site. I recorded this in January 2014.
+  I decided to pretend I was a kid who really didn&rsquo;t get it,
+  and see what it would do if I put in the wrong answer.</p>
+
+  <p>Note the behavior when I click the button to submit the wrong answer.</p>
+
+  <p>Now&hellip; this is really no better or worse
+  than the error message I showed you at the beginning,
+  the one with the multiplicand.
+  But to me, it&rsquo;s really sad,
+  because it&rsquo;s so much less ambitious.</p>
+
+  <p>Think this over.
+  Now that you know: what would an expert tutor do?
+  What if it was you tutoring the kid in this movie?
+  Is this a productive or nonproductive error?
+  At what point would you intervene?
+  What would you say?</p>
+
+  <p>Is the computer doing it right?</p>
+
+  <p>Does it even have the information it would need to do it right?</p>
+
+  <p>I don&rsquo;t want to pick on this web site.
+  They never claimed to be a substitute for a human tutor.
+  They&rsquo;ve put a lot of work in, and the site does some
+  things quite well.</p>
+
+  <p>My point is that educational software
+  is not approaching a stable state where it&rsquo;s good enough
+  and we can work on other things.
+  If we take human tutors as the gold standard,
+  we have to admit that
+  <em>educational software just isn&rsquo;t very good yet.</em>
+  There&rsquo;s clearly tremendous upside yet to be realized.
+  Some of it is low-hanging fruit.
+  Much of it is not.</p>
+
+  <p>Excellent teaching technology
+  seemed just around the corner in the 1960s.
+  But I expect we will be laboriously catching up to Socrates
+  for another hundred years.</p>
+</section>
+
+
+<section id="sec-volunteer">
+  <h2>Use your supervillain powers for good</h2>
+
+  <p>Is a hundred years too long to wait?
+  You can make a difference now.</p>
+
+  <p>Help teach a bit of what you know
+  to middle school students in the Nashville Metro schools.
+  <a href="http://emilynbristow.wix.com/digitalexposure">You can
+  get started here.</a></p>
+</section>
+
+<hr />
+
+<div class="footer">
+  <p><strong>Jason Orendorff</strong> hacks C++ for Mozilla, working on the JavaScript engine in Firefox.
+  He lives on a ridge north of Nashville.
+  He&rsquo;s interested in math, libraries, and time travel.
+  This talk was written for
+  <a href="http://www.nashvillecode.org/events/2013-march/">Nashville Code Co-op Talk Day</a>,
+  March 30, 2013.
+  You can watch the <a href="https://www.youtube.com/watch?v=IvizUiOCjGU">video
+  of this talk</a>, but it&rsquo;s kind of long.</p>
+
+  <p>If you&rsquo;d like to give this talk,
+  feel free to use <a href="https://speakerdeck.com/jorendorff/whats-known-about-tutoring">the
+  slides</a> (PDF).</p>
+
+  <p><strong>Photo credits:</strong>
+    Fishing lesson,
+      <a href="https://www.flickr.com/photos/tedkerwin/2805336323/sizes/l/">Ted Kerwin</a>.
+    Girls intently looking at a laptop,
+      <a href="https://www.flickr.com/photos/esti/4638056301/sizes/l/">Esti Alvarez</a>.
+    Schoolwork at a table,
+      <a href="https://www.flickr.com/photos/shanastine/4148667773/sizes/o/">Shana
+        Stine</a>.
+    Practicing writing,
+      <a href="https://www.flickr.com/photos/8643998@N07/4525110823/sizes/l/">Anuraj
+      Singh</a>.
+    Vegetable boxes,
+      <a href="https://www.flickr.com/photos/usfsregion5/5808624919/sizes/o/">United States
+      Forest Service Region 5</a>.
+    Teacher with student and chalkboard,
+      <a href="https://www.flickr.com/photos/15442599@N07/10844548053/sizes/l/">Juan Carlos
+      Mej&iacute;a</a>.
+    Moon,
+      <a href="https://www.flickr.com/photos/skyrim/7145647087/sizes/l/">Mahin Fayaz</a>.
+  Thank you! And thanks
+  to <a href="https://www.flickr.com/">flickr</a> for their fantastic
+  <a href="https://www.flickr.com/creativecommons/">Creative Commons search</a>
+  feature.</p>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
