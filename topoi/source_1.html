@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Hugh Burns - Aristotle's Topics — 3 of 18</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="author" content="Hugh Burns" />
+  <meta name="description" content="A page for the game Aristotle's Topics by Hugh Burns." />
+  <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+ </head>
+
+<body>
+
+<div class = "container">
+
+<div class ="sourcecoverimage">
+	<span><a href="Cover.jpg"><img src="Small Cover.jpg" border="1"></a></span>
+</div>
+
+<div class ="sourceintroduction">
+	<h1>
+		<span>Aristotle's Topics</span> <span class="pagination">— 3 of 18</span>
+	</h1>
+	<h2>
+		<span>Hugh Burns</span>
+	</h2>
+	<div class ="sourcebibliography">
+		<span>Release 1</span>
+	</div>
+</div>
+
+<div class = "links">
+<ul>
+<li><a href="index.html">Home page</a></li><li><a href="source.html">Beginning</a></li><li><a href="source_0.html">Previous</a></li><li><a href="source_2.html">Next</a></li>
+</ul>
+</div>
+
+<div class = "source">
+<p class="indent0"><span class="heading">Section 1 - Line input</span></p><p class="indent0"><span class="comment">[Curiously, Inform offers no phrases that simply pause in the middle of running code and wait for the user to type something. BASIC has this capability, and the program makes pervasive use of it.]</span></p><p class="indent0">Include (-<span class="i6code"> Global user_input = 100; </span>-) after &quot;<span class="quote">Parser.i6t</span>&quot;.</p><p class="indent0">The user input is a snippet that varies. The user input variable translates into I6 as &quot;<span class="quote">user_input</span>&quot;.</p><p class="indent0">To call KeyboardPrimitive: (-<span class="i6code"></span></p><p class="indent1"><span class="i6code">KeyboardPrimitive(buffer, parse);</span></p><p class="indent1"><span class="i6code">user_input = 100 + WordCount();</span></p><p class="indent0"><span class="i6code"></span>-).</p><p class="indent0">To get a line of input, ignoring blank lines:</p><p class="indent1">call KeyboardPrimitive;</p><p class="indent1">if ignoring blank lines:</p><p class="indent2">while the user input is &quot;<span class="quote"></span>&quot;:</p><p class="indent3">call KeyboardPrimitive.</p><p class="indent0">To wait for the user to press Return:</p><p class="indent1">call KeyboardPrimitive.</p><p class="indent0">To decide whether the user agrees:</p><p class="indent1">get a line of input;</p><p class="indent1">if the user input matches the regular expression &quot;<span class="quote">YE</span>&quot;, decide yes;</p><p class="indent1">decide no.</p>
+</div>
+
+<div class ="notes">
+
+</div>
+
+</div>
+
+</body>
+
+</html>
