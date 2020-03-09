@@ -160,7 +160,20 @@ To show directions and commands:
 	wait for the user to press Return;
 	print "[line break][line break][tab]3.  AFTER YOU FINISH TYPING YOUR RESPONSE, YOU MUST PRESS[line break][tab]THE 'RETURN' KEY.  WHEN YOU DO , I'LL READ YOUR[line break][tab]RESPONSE AND SAY SOMETHING BACK TO YOU.[line break][line break][line break][tab]4.  THE MOST IMPORTANT OBJECTIVE OF THIS PROGRAM[line break][tab]IS TO GET YOU THINKING ABOUT YOUR TOPIC.[line break][line break][tab]IN ORDER TO ACHIEVE THIS OBJECTIVE,[line break][tab]YOU ARE GOING TO HAVE TO FORGET THAT I AM A MACHINE.[line break][line break][tab]PLEASE ASK QUESTIONS.  YOU'LL BE SURPRISED BY HOW MUCH[line break][tab]I KNOW (OR SO I HOPE!)  I'M NOT[line break][tab]GUARANTEEING THE TRUTH, BUT I'LL DO THE BEST I CAN.[line break][tab]MY MEMORY IS STILL DEVELOPING.[line break][line break][line break][line break][tab][tab](HIT 'RETURN' TO CONTINUE.)[line break][line break][line break]";
 	wait for the user to press Return;
-	print "[line break][line break][line break][tab]COMMANDS:[line break][line break][tab]TYPE IN-->[tab]I'LL DO THIS-->[line break][tab]----------[tab]---------------[line break][line break][tab]STOP![tab]I'LL STOP ASKING QUESTIONS AND CLOSE.[line break][line break][tab]CONTINUE![tab]I'LL SKIP AHEAD TO THE NEXT QUESTION.[line break][line break][tab]REPEAT![tab]I'LL REPEAT THE QUESTION.[line break][line break][tab]DIRECTIONS![tab]I'LL SHOW YOU THE DIRECTIONS AGAIN.[line break][line break][tab]CHANGE![tab]I'LL LET YOU CHANGE OR NARROW YOUR SUBJECT.[line break][line break][tab]?[tab]I'LL LET YOU ASK A QUESTION.[line break][line break][tab]EXPLAIN![tab]I'LL EXPLAIN THE QUESTION.[line break][tab][tab](THIS ONE IS A LOT OF FUN, [first name].)[line break][line break][tab]&&[tab]I'LL LET YOU CONTINUE WITH YOUR RESPONSE.[line break][line break][tab][tab](PRESS 'RETURN' TO CONTINUE.)";
+	[The following lines have just the right numbers of space characters to align the second column when printed in a fixed-width font. This is necessary because [tab] is always a fixed 14 characters in our program; I tried making the "print" rule handle tab characters, but Inform is not well suited to such fine-grained string hackery; it worked but it was too slow.]
+	print "[line break][line break][line break][tab]COMMANDS:[line break][line break]";
+	print "[tab]TYPE IN-->    I'LL DO THIS-->[line break]";
+	print "[tab]----------    ---------------[line break][line break]";
+	print "[tab]STOP!         I'LL STOP ASKING QUESTIONS AND CLOSE.[line break][line break]";
+	print "[tab]CONTINUE!     I'LL SKIP AHEAD TO THE NEXT QUESTION.[line break][line break]";
+	print "[tab]REPEAT!       I'LL REPEAT THE QUESTION.[line break][line break]";
+	print "[tab]DIRECTIONS!   I'LL SHOW YOU THE DIRECTIONS AGAIN.[line break][line break]";
+	print "[tab]CHANGE!       I'LL LET YOU CHANGE OR NARROW YOUR SUBJECT.[line break][line break]";
+	print "[tab]?             I'LL LET YOU ASK A QUESTION.[line break][line break]";
+	print "[tab]EXPLAIN!      I'LL EXPLAIN THE QUESTION.[line break]";
+	print "[tab]              (THIS ONE IS A LOT OF FUN, [first name].)[line break][line break]";
+	print "[tab]&&            I'LL LET YOU CONTINUE WITH YOUR RESPONSE.[line break][line break]";
+	print "[tab][tab](PRESS 'RETURN' TO CONTINUE.)";
 	wait for the user to press Return;
 	print "[line break][line break][line break][line break][tab]TWO LAST THINGS:[line break][line break]";
 	print "[tab]***  THINK OF ME AS A PERSON WHO CAN ASK A LOT OF[line break][tab]INTERESTING, THOUGHT-PROVOKING, AND WILD QUESTIONS.[line break][line break][line break]";
