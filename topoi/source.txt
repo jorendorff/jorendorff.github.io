@@ -11,7 +11,7 @@ Chapter 1 - The old school
 
 [In which we teach Inform how to behave a little more like '70s-era BASIC.]
 
-The Agora is a room. [Inform requires the world to contain at least one room, even though we are not using its world model at all, in the interest of fidelity to the original program.]
+The Lyceum is a room. [Inform requires the world to contain at least one room, even though we are not using its world model at all, in the interest of fidelity to the original program.]
 
 Section 1 - Line input
 
